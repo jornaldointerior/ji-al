@@ -1,7 +1,7 @@
 export const MOCK_NEWS = [
   {
     id: "1",
-    title: "Sertão ganha novo complexo industrial automotivo em 2026",
+    title: "Sertão de Alagoas ganha novo complexo industrial automotivo em 2026",
     excerpt: "Governo estadual anuncia investimento bilionário que deve gerar mais de 5 mil empregos diretos na região do Pajeú.",
     image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800",
     category: "Economia",

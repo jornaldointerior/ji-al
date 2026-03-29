@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { MOCK_NEWS } from "@/lib/mock-data";
 import Link from "next/link";
 import Container from "../ui/Container";
@@ -8,41 +9,60 @@ export default function NewsFeed() {
   const categories = ["Política", "Economia", "Cultura", "Esportes"];
 
   return (
-    <section className="py-12 bg-white">
-      <Container className="flex flex-col gap-16">
-        {categories.map((cat) => (
-          <div key={cat} className="flex flex-col gap-8">
-            <div className="flex items-center justify-between border-b-2 border-primary pb-2">
-              <Headline variant="primary" className="text-2xl uppercase tracking-tighter">
-                {cat}
-              </Headline>
-              <Link 
-                href={`/categoria/${cat.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
-                className="text-[10px] font-sans font-black uppercase text-accent tracking-widest hover:text-primary transition-colors"
-              >
-                Ver Tudo +
-              </Link>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {MOCK_NEWS.filter(n => n.category === cat).map((news) => (
-                <NewsCard
-                  key={news.id}
-                  {...news}
-                  className="h-full border-0 p-0 shadow-none hover:shadow-xl transition-shadow transition-transform hover:-translate-y-1"
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+    <div className="flex flex-col gap-24 relative">
+        {categories.map((cat, idx) => {
+          const catNews = MOCK_NEWS.filter(n => n.category === cat).slice(0, 3);
+          const isEven = idx % 2 === 0;
 
-        {/* Inter-section Ad */}
-        <div className="w-full bg-slate-50 border border-slate-100 py-10 flex items-center justify-center">
-          <span className="text-[10px] tracking-[0.4em] uppercase font-black text-slate-300">
-            Publicidade Institucional
-          </span>
-        </div>
-      </Container>
-    </section>
+          return (
+            <div key={cat} className="flex flex-col gap-12 reveal-up">
+              {/* Category Header */}
+              <div className="flex items-end justify-between border-b-[6px] border-primary pb-6">
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.5em] text-accent">Sessão</span>
+                  <Headline variant="primary" as="h2" className="text-5xl md:text-7xl lowercase italic leading-none">
+                    {cat}
+                  </Headline>
+                </div>
+                <Link 
+                  href={`/categoria/${cat.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
+                  className="text-[10px] font-sans font-black uppercase text-primary tracking-[0.3em] hover:text-accent transition-colors pb-2 border-b border-primary/10"
+                >
+                  Arquivo Completo +
+                </Link>
+              </div>
+              
+              {/* Dynamic Grid Layout */}
+              <div className={cn(
+                "grid gap-16",
+                isEven ? "lg:grid-cols-12" : "lg:grid-cols-3"
+              )}>
+                {isEven ? (
+                  <>
+                    <div className="lg:col-span-8">
+                       <NewsCard {...catNews[0]} variant="horizontal" className="h-full" />
+                    </div>
+                    <div className="lg:col-span-4 flex flex-col gap-12">
+                       {catNews.slice(1).map(news => (
+                         <NewsCard key={news.id} {...news} variant="compact" />
+                       ))}
+                    </div>
+                  </>
+                ) : (
+                  catNews.map((news) => (
+                    <NewsCard
+                      key={news.id}
+                      {...news}
+                    />
+                  ))
+                )}
+              </div>
+
+            </div>
+          );
+        })}
+
+    </div>
   );
 }
+

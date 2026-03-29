@@ -12,32 +12,33 @@ const BREAKING_NEWS = [
 
 export default function BreakingNews() {
   return (
-    <div className="bg-slate-900 py-1.5 overflow-hidden border-y border-white/5 relative">
-      <Container className="flex items-center gap-0">
-        <div className="flex-shrink-0 bg-accent text-white px-3 py-1 font-sans font-black text-[9px] uppercase tracking-wider relative z-10 shadow-[4px_0_15px_rgba(0,0,0,0.3)]">
-          Urgente
+    <div className="bg-white border-b border-slate-200 py-2.5 overflow-hidden relative">
+      <Container className="flex items-center gap-6">
+        <div className="flex-shrink-0 flex items-center gap-2">
+          <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+          <span className="text-accent font-sans font-black text-[10px] uppercase tracking-[0.2em] whitespace-nowrap">
+            Urgente
+          </span>
         </div>
         
+        <div className="h-4 w-px bg-slate-200 flex-shrink-0" />
+        
         <div className="flex-1 overflow-hidden relative">
-          {/* Gradient masks for smooth fading */}
-          <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
-          <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-slate-900 to-transparent z-10" />
-          
           <motion.div
-            animate={{ x: ["5%", "-100%"] }}
+            animate={{ x: ["0%", "-50%"] }}
             transition={{
-              duration: 35,
+              duration: 40,
               repeat: Infinity,
               ease: "linear",
             }}
-            className="flex gap-20 whitespace-nowrap py-1"
+            className="flex gap-16 whitespace-nowrap items-center"
           >
-            {BREAKING_NEWS.map((news, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-                <span className="text-slate-200 text-[11px] font-bold font-sans tracking-wide uppercase">
+            {[...BREAKING_NEWS, ...BREAKING_NEWS].map((news, i) => (
+              <div key={i} className="flex items-center gap-4 group cursor-pointer">
+                <span className="text-primary text-[11px] font-bold font-sans tracking-wide uppercase group-hover:text-accent transition-colors">
                   {news}
                 </span>
+                <span className="text-slate-300 font-serif italic text-lg">/</span>
               </div>
             ))}
           </motion.div>

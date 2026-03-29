@@ -38,14 +38,14 @@ export default function Sidebar() {
   const cityData = WEATHER_LOCATIONS[currentCityIndex];
 
   return (
-    <aside className="w-full h-full flex flex-col gap-10">
+    <aside className="w-full h-full flex flex-col gap-12">
       {/* Weather Widget */}
-      <div className="bg-slate-50 p-6 border border-slate-100 group">
-        <div className="flex justify-between items-start mb-4">
-          <Headline variant="secondary" className="text-[10px] uppercase tracking-[0.3em] font-black text-slate-400">
+      <div className="bg-white p-6 border border-slate-200 group relative">
+        <div className="flex justify-between items-start mb-6">
+          <Headline variant="secondary" className="text-[9px] uppercase tracking-[0.4em] font-black text-slate-400">
             Céu do Sertão
           </Headline>
-          <div className="flex items-center gap-1 text-[9px] font-sans font-black text-accent uppercase">
+          <div className="flex items-center gap-1.5 text-[9px] font-sans font-black text-accent uppercase tracking-widest">
             <MapPin size={10} />
             {cityData.city}
           </div>
@@ -57,55 +57,61 @@ export default function Sidebar() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="flex items-center justify-between"
+            className="flex items-baseline justify-between"
           >
-            <div>
-              <div className="text-4xl font-sans font-black text-primary flex items-start">
-                {cityData.temp}<span className="text-lg mt-1">°C</span>
-              </div>
-              <div className="text-[11px] text-accent font-sans font-black uppercase tracking-wider">
-                {cityData.status}
-              </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-6xl font-serif font-black text-primary leading-none tracking-tighter">
+                {cityData.temp}
+              </span>
+              <span className="text-xl font-serif font-bold text-slate-300">°C</span>
             </div>
             <motion.div 
               animate={{ rotate: [0, 5, 0] }}
-              transition={{ duration: 4, repeat: Infinity }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="text-accent"
             >
               {cityData.temp > 32 ? (
-                <Sun className="text-accent" size={52} strokeWidth={1.5} />
+                <Sun size={48} strokeWidth={1.5} />
               ) : (
-                <Cloud className="text-primary" size={52} strokeWidth={1.5} />
+                <Cloud size={48} strokeWidth={1.5} />
               )}
             </motion.div>
           </motion.div>
         </AnimatePresence>
         
-        <div className="mt-6 pt-4 border-t border-slate-200/50 flex justify-between text-[10px] text-slate-400 font-sans font-bold uppercase tracking-widest">
-          <div className="flex items-center gap-1.5">
-            <Droplets size={12} className="text-primary/40" />
-            <span>Umidade: {cityData.humidity}%</span>
+        <div className="mt-2 mb-6">
+          <span className="text-[11px] text-primary font-serif font-bold italic lowercase opacity-70 tracking-wide">
+            {cityData.status}
+          </span>
+        </div>
+        
+        <div className="pt-5 border-t border-slate-100 flex justify-between text-[9px] text-slate-400 font-sans font-black uppercase tracking-[0.2em]">
+          <div className="flex items-center gap-2">
+            <Droplets size={12} className="text-accent" />
+            <span>Umidade {cityData.humidity}%</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Wind size={12} className="text-primary/40" />
-            <span>Vento: {cityData.wind} km/h</span>
+          <div className="flex items-center gap-2">
+            <Wind size={12} className="text-accent" />
+            <span>Vento {cityData.wind}kmh</span>
           </div>
         </div>
       </div>
 
       {/* Poll Widget */}
-      <div className="bg-white p-6 border border-slate-200 relative overflow-hidden">
-        <div className="flex items-center gap-2 mb-4 bg-primary px-3 py-1 w-fit shadow-md">
-          <Star size={10} className="text-white fill-white" />
-          <Headline variant="primary" className="text-[10px] uppercase tracking-widest text-white leading-none">
-            Enquete do Dia
+      <div className="bg-white p-8 border border-slate-200 relative">
+        <div className="absolute top-0 left-0 w-full h-1 bg-accent" />
+        <div className="flex items-center gap-3 mb-6">
+          <Headline variant="accent" className="text-[10px] leading-none">
+            Enquete
           </Headline>
+          <div className="h-px bg-slate-100 flex-1" />
         </div>
         
-        <p className="text-base font-sans font-extrabold text-primary mb-6 leading-[1.3] tracking-tight">
+        <p className="text-xl font-serif font-black text-primary mb-8 leading-[1.25] tracking-tight">
           Você concorda com as novas diretrizes de fiscalização agrícola no interior?
         </p>
         
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <AnimatePresence mode="wait">
             {!hasVoted ? (
               <motion.div 
@@ -122,40 +128,40 @@ export default function Sidebar() {
                       setSelectedOption(opt.id);
                       setHasVoted(true);
                     }}
-                    className="text-left w-full p-4 border border-slate-100 text-[11px] font-sans font-black uppercase tracking-widest text-slate-500 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center group/btn"
+                    className="text-left w-full p-4 border border-slate-100 text-[10px] font-sans font-black uppercase tracking-widest text-slate-500 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center group/btn"
                   >
                     {opt.text}
-                    <ArrowRight size={14} className="opacity-0 group-hover/btn:opacity-100 -translate-x-2 group-hover/btn:translate-x-0 transition-all" />
+                    <ArrowRight size={14} className="opacity-0 group-hover/btn:opacity-100 -translate-x-2 group-hover/btn:translate-x-0 transition-all text-accent" />
                   </button>
                 ))}
               </motion.div>
             ) : (
               <motion.div 
                 key="poll-results"
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="space-y-5 py-2"
+                className="space-y-6"
               >
                 {pollOptions.map((opt) => (
                   <div key={opt.id} className="space-y-2">
                     <div className="flex justify-between text-[10px] font-sans font-black uppercase tracking-widest text-primary">
                       <span className={cn(selectedOption === opt.id && "text-accent")}>
-                        {opt.text} {selectedOption === opt.id && "(SEU VOTO)"}
+                        {opt.text}
                       </span>
                       <span>{opt.percent}%</span>
                     </div>
-                    <div className="h-2 w-full bg-slate-100 rounded-none overflow-hidden">
+                    <div className="h-1.5 w-full bg-slate-50 rounded-none overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${opt.percent}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
+                        transition={{ duration: 1.2, ease: "circOut" }}
                         className={cn("h-full", selectedOption === opt.id ? "bg-accent" : "bg-primary")}
                       />
                     </div>
                   </div>
                 ))}
-                <div className="pt-2 text-[10px] text-slate-300 font-sans font-bold uppercase text-center italic">
-                  Obrigado pela sua participação!
+                <div className="pt-4 text-[9px] text-slate-300 font-sans font-black uppercase tracking-[0.3em] text-center italic">
+                  Voto computado. Obrigado!
                 </div>
               </motion.div>
             )}
@@ -164,23 +170,29 @@ export default function Sidebar() {
       </div>
 
       {/* Most Read List */}
-      <div className="flex flex-col gap-6">
-        <Headline variant="primary" className="text-base flex items-center gap-2 mb-2 border-l-4 border-accent pl-3 uppercase tracking-[0.2em] font-black leading-none">
-          Mais <span className="text-accent underline decoration-primary decoration-4 underline-offset-4 decoration-skip-ink-none">Lidas</span>
-        </Headline>
+      <div className="flex flex-col gap-8">
+        <div className="flex items-center gap-3 mb-2">
+          <Headline variant="primary" className="text-lg leading-none italic">
+            Mais Lidas
+          </Headline>
+          <div className="h-0.5 bg-primary flex-1" />
+        </div>
         
         <div className="flex flex-col divide-y divide-slate-100">
           {mostRead.map((news, index) => (
-            <Link key={news.id} href={news.href} className="group py-5 first:pt-0 last:pb-0 flex gap-4 items-start">
-              <span className="text-5xl font-sans font-black text-slate-100/80 group-hover:text-accent/20 transition-colors leading-[0.8] min-w-[3.5rem] tracking-tighter">
-                {String(index + 1).padStart(2, '0')}
+            <Link key={news.id} href={news.href} className="group py-6 first:pt-0 last:pb-0 flex gap-6 items-start">
+              <span className="text-4xl font-serif font-black text-slate-200 group-hover:text-accent transition-colors leading-[0.7] pt-1">
+                {String(index + 1)}
               </span>
-              <div className="flex flex-col gap-1.5 flex-1 pt-1">
-                <span className="text-[9px] uppercase font-black text-accent font-sans tracking-[0.2em]">{news.category}</span>
-                <p className="text-xs font-sans font-extrabold leading-snug text-primary group-hover:text-accent transition-colors line-clamp-2 uppercase tracking-tight">
+              <div className="flex flex-col gap-2 flex-1">
+                <span className="text-[8px] uppercase font-black text-accent font-sans tracking-[0.3em]">{news.category}</span>
+                <p className="text-sm font-serif font-black leading-snug text-primary group-hover:text-accent transition-colors line-clamp-2 uppercase- tracking-tight">
                   {news.title}
                 </p>
-                <span className="text-[10px] text-slate-400 font-sans font-medium uppercase">{news.date}</span>
+                <div className="flex items-center gap-2">
+                  <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                  <span className="text-[9px] text-slate-400 font-sans font-black uppercase tracking-widest">{news.date}</span>
+                </div>
               </div>
             </Link>
           ))}
@@ -188,9 +200,10 @@ export default function Sidebar() {
       </div>
 
       {/* Static Ad Space */}
-      <div className="bg-slate-100 h-64 border border-dashed border-slate-300 flex items-center justify-center p-6 text-center group cursor-pointer hover:bg-slate-200 transition-colors">
+      <div className="bg-slate-50 h-80 border border-slate-200 flex flex-col items-center justify-center p-8 text-center group cursor-pointer hover:bg-slate-100 transition-colors">
+        <div className="mb-4 px-3 py-1 bg-white border border-slate-200 text-[8px] uppercase tracking-[0.3em] font-black text-slate-300">Anúncio</div>
         <span className="text-[10px] uppercase tracking-[0.4em] font-black text-slate-300 group-hover:text-slate-500 transition-colors">
-          Espaço Publicitário
+          Espaço Reservado
         </span>
       </div>
     </aside>

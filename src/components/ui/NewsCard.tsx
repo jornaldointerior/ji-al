@@ -28,53 +28,57 @@ export default function NewsCard({
     <Link
       href={href}
       className={cn(
-        "group block transition-all duration-300 hover:opacity-95",
-        "border border-slate-200 bg-white rounded-none overflow-hidden",
-        variant === "horizontal" ? "flex flex-col md:flex-row" : "flex flex-col",
+        "group block transition-all duration-700 bg-transparent",
+        variant === "horizontal" ? "flex flex-col md:flex-row gap-8" : "flex flex-col gap-6",
         className
       )}
     >
       <div
         className={cn(
-          "relative overflow-hidden z-0 bg-slate-100 border-b border-slate-100",
+          "relative overflow-hidden z-0 bg-secondary border border-primary/5",
           variant === "horizontal" 
-            ? "basis-full md:basis-[40%] h-[200px] md:h-auto shrink-0" 
-            : "w-full aspect-video min-h-[180px] shrink-0"
+            ? "basis-full md:basis-[45%] h-[280px] md:h-auto shrink-0" 
+            : "w-full aspect-[4/3] shrink-0"
         )}
       >
         <Image
           src={image}
           alt={title}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={(e) => {
-            // Handle image error if needed
-          }}
+          className="object-cover transition-transform duration-1000 group-hover:scale-110 grayscale-[0.5] group-hover:grayscale-0"
         />
-        <div className="absolute top-4 left-4 bg-primary text-white text-[10px] uppercase tracking-widest font-black px-3 py-1.5 font-sans z-10 shadow-xl border border-white/10">
+        <div className="absolute top-4 left-4 bg-white text-primary text-[8px] uppercase tracking-[0.4em] font-black px-3 py-1.5 z-10 border border-primary/10">
           {category}
         </div>
       </div>
 
-      <div className={cn("p-5 md:p-6 flex flex-col gap-3", variant === "compact" && "p-3")}>
-        <Headline
-          as={variant === "compact" ? "h4" : "h3"}
-          className={cn(
-            "leading-tight group-hover:text-accent transition-colors",
-            variant === "compact" ? "text-sm line-clamp-2" : "text-xl line-clamp-3"
+      <div className={cn("flex flex-col gap-4 py-2", variant === "compact" && "gap-2")}>
+        <div className="flex flex-col gap-3">
+          <Headline
+            as={variant === "compact" ? "h4" : "h3"}
+            className={cn(
+              "leading-[1.05] group-hover:text-accent transition-colors duration-500",
+              variant === "compact" ? "text-lg line-clamp-2" : "text-3xl md:text-3.5xl line-clamp-3"
+            )}
+          >
+            {title}
+          </Headline>
+          
+          {excerpt && variant !== "compact" && (
+            <p className="text-slate-500 text-[14px] line-clamp-2 font-serif italic leading-relaxed border-l border-accent/20 pl-5 mt-1">
+              {excerpt}
+            </p>
           )}
-        >
-          {title}
-        </Headline>
+        </div>
         
-        {excerpt && variant !== "compact" && (
-          <p className="text-muted text-sm line-clamp-2 font-serif leading-relaxed">
-            {excerpt}
-          </p>
-        )}
-        
-        <div className="mt-auto text-[10px] text-slate-400 uppercase font-sans font-medium">
-          {date}
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-[9px] text-primary/40 uppercase font-sans font-black tracking-[0.2em] flex items-center gap-3">
+            <span className="w-8 h-[1px] bg-primary/10" />
+            {date}
+          </span>
+          <span className="text-[9px] text-accent font-black tracking-[0.3em] uppercase opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
+            Ler +
+          </span>
         </div>
       </div>
     </Link>
