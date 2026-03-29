@@ -1,0 +1,44 @@
+"use client";
+
+import { motion } from "framer-motion";
+import Header from "@/components/Header/Header";
+import BreakingNews from "@/components/Header/BreakingNews";
+import Hero from "@/components/Hero/Hero";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import NewsFeed from "@/components/NewsFeed/NewsFeed";
+import Footer from "@/components/Footer";
+import Container from "@/components/ui/Container";
+
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.6, ease: [0.33, 1, 0.68, 1] as any }
+};
+
+export default function Home() {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <BreakingNews />
+      
+      <motion.main {...fadeIn}>
+        <Hero />
+        
+        <Container className="grid lg:grid-cols-12 gap-12 py-12">
+          {/* Main Content Area */}
+          <div className="lg:col-span-8">
+            <NewsFeed />
+          </div>
+
+          {/* Sidebar Area */}
+          <div className="lg:col-span-4">
+            <Sidebar />
+          </div>
+        </Container>
+      </motion.main>
+
+      <Footer />
+    </div>
+  );
+}
