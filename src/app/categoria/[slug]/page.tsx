@@ -5,7 +5,22 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import NewsCard from "@/components/ui/NewsCard";
 import Headline from "@/components/ui/Headline";
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
+interface CategoryParams {
+  slug: string;
+}
+
+export function generateStaticParams(): CategoryParams[] {
+  return [
+    { slug: "politica" },
+    { slug: "economia" },
+    { slug: "cultura" },
+    { slug: "esportes" },
+    { slug: "policia" },
+    { slug: "eventos" }
+  ];
+}
+
+export default function CategoryPage({ params }: { params: CategoryParams }) {
   // Map slugs to display names
   const categoryMap: Record<string, string> = {
     "politica": "Política",

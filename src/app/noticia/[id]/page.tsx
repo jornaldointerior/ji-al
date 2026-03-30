@@ -1,13 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getNewsById, RELATED_CONTENT } from "@/lib/mock-data";
+import { getNewsById, RELATED_CONTENT, MOCK_NEWS } from "@/lib/mock-data";
 import Container from "@/components/ui/Container";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Headline from "@/components/ui/Headline";
 import { ChevronLeft, Share2, Printer, Bookmark } from "lucide-react";
 
-export default function ArticlePage({ params }: { params: { id: string } }) {
+interface ArticleParams {
+  id: string;
+}
+
+export function generateStaticParams(): ArticleParams[] {
+  return MOCK_NEWS.map((news) => ({
+    id: news.id,
+  }));
+}
+
+export default function ArticlePage({ params }: { params: ArticleParams }) {
   const news = getNewsById(params.id);
 
   if (!news) {

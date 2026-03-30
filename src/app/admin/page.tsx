@@ -5,7 +5,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col gap-2">
-        <Headline variant="tertiary" className="text-primary text-3xl mb-0">Visão Geral</Headline>
+        <Headline variant="primary" className="text-primary text-3xl mb-0">Visão Geral</Headline>
         <p className="font-serif italic text-slate-500">Acompanhe as métricas do Jornal do Interior hoje.</p>
       </div>
 

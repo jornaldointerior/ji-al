@@ -52,7 +52,7 @@ export default function NoticiasAdminPage() {
     <div className="flex flex-col gap-10 max-w-6xl mx-auto">
       <div className="flex flex-col gap-2 border-b border-primary/10 pb-8 flex-row items-end justify-between">
         <div className="flex flex-col gap-2">
-          <Headline variant="tertiary" className="text-primary text-4xl mb-0">Matérias Publicadas</Headline>
+          <Headline variant="primary" className="text-primary text-4xl mb-0">Matérias Publicadas</Headline>
           <p className="font-serif italic text-slate-500 text-lg">Gerenciamento editorial de todo o conteúdo do portal.</p>
         </div>
         <Link href="/admin/publicar" className="bg-accent text-white px-8 py-3 text-[10px] uppercase tracking-widest font-black hover:bg-primary transition-colors shadow-lg">

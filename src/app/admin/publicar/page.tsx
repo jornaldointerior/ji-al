@@ -128,7 +128,7 @@ export default function PublicarPage() {
   return (
     <div className="flex flex-col gap-10 max-w-4xl mx-auto">
       <div className="flex flex-col gap-2 border-b border-primary/10 pb-8">
-        <Headline variant="tertiary" className="text-primary text-4xl mb-0">Publicar Notícia</Headline>
+        <Headline variant="primary" className="text-primary text-4xl mb-0">Publicar Notícia</Headline>
         <p className="font-serif italic text-slate-500 text-lg">Crie uma nova matéria para o portal Journal do Interior.</p>
       </div>
 
