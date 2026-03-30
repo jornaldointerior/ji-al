@@ -36,5 +36,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./out/
           server-dir: ./public_html/
+<<<<<<< HEAD
           # Optional: can delete everything from public_html first
           # delete-destination: true
+=======
+>>>>>>> 97800abae326a4e5b9983242acfb0761da4be38a
