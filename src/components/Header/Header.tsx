@@ -46,8 +46,8 @@ export default function Header() {
 
       {/* Main header */}
       <div className={cn(
-        "bg-white z-50 transition-all duration-300 border-b border-transparent",
-        isScrolled ? "fixed top-0 left-0 right-0 border-slate-200 py-3" : "relative py-10"
+        "bg-white z-50 transition-all duration-300 border-b border-slate-100 sticky top-0 w-full",
+        isScrolled ? "py-2 shadow-md" : "py-4 shadow-sm"
       )}>
         <Container className="flex justify-between items-center">
           <Link href="/" className="group flex items-center mx-auto lg:mx-0 py-2">

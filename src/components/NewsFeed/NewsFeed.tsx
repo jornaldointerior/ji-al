@@ -23,7 +23,7 @@ export default function NewsFeed() {
               <div className="flex items-end justify-between border-b-[6px] border-primary pb-6">
                 <div className="flex flex-col gap-2">
                   <span className="text-[10px] font-black uppercase tracking-[0.5em] text-accent">Sessão</span>
-                  <Headline variant="primary" as="h2" className="text-5xl md:text-7xl lowercase italic leading-none">
+                  <Headline variant="primary" as="h2" className="text-5xl md:text-7xl italic leading-none">
                     {cat}
                   </Headline>
                 </div>

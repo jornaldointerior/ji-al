@@ -9,7 +9,7 @@ export default function Hero() {
   const sideNews = MOCK_NEWS.slice(1, 4);
 
   return (
-    <section className="relative pt-20 pb-16 overflow-hidden border-b border-primary/5">
+    <section className="relative pt-10 pb-16 overflow-hidden border-b border-primary/5">
       <Container>
         <div className="flex flex-col gap-20">
           {/* Typographic Header Section - Optimized for Absolute Edge-to-Edge 2-line impact */}
