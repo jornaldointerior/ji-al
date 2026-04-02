@@ -27,6 +27,7 @@ export default function Footer() {
             <li><a href="#" className="hover:text-white transition-colors uppercase tracking-widest">Anuncie Conosco</a></li>
             <li><a href="#" className="hover:text-white transition-colors uppercase tracking-widest">Política de Privacidade</a></li>
             <li><a href="#" className="hover:text-white transition-colors uppercase tracking-widest">Trabalhe Conosco</a></li>
+            <li><Link href="/admin" className="text-accent hover:text-white transition-colors uppercase tracking-widest">Acesso Restrito</Link></li>
           </ul>
         </div>
 
