@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/portal-modernization-v2
 
 jobs:
   build-and-deploy:
@@ -28,6 +29,11 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
+      - name: 🛠️ Sanitize Build (Rename _next to static_next)
+        run: |
+          mv ./out/_next ./out/static_next
+          find ./out -type f \( -name "*.html" -o -name "*.js" -o -name "*.json" -o -name "*.css" \) -exec sed -i 's/_next/static_next/g' {} +
+
       - name: 🚀 Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -35,6 +41,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./out/
-          server-dir: ./
+          server-dir: ./public_html/
           protocol: ftps
           port: 21
+
