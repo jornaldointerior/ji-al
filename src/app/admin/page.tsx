@@ -1,69 +1,153 @@
-import { FileText, TrendingUp, Users } from "lucide-react";
+"use client";
+
+import { FileText, TrendingUp, Users, ArrowUpRight, Plus, Newspaper } from "lucide-react";
 import Headline from "@/components/ui/Headline";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function AdminDashboard() {
+  const stats = [
+    { 
+      label: "Notícias Publicadas", 
+      value: "12", 
+      change: "+3 essa semana", 
+      icon: FileText,
+      color: "text-primary"
+    },
+    { 
+      label: "Audiência Digital", 
+      value: "1.4K", 
+      change: "+12.4% vs ontem", 
+      icon: TrendingUp,
+      color: "text-accent"
+    },
+    { 
+      label: "Leitores Ativos", 
+      value: "48", 
+      change: "Assinaturas premium", 
+      icon: Users,
+      color: "text-primary"
+    },
+  ];
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  } as any;
+
+  const item = {
+    hidden: { y: 20, opacity: 0 },
+    show: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } }
+  } as any;
+
   return (
-    <div className="flex flex-col gap-10">
-      <div className="flex flex-col gap-2">
-        <Headline variant="primary" className="text-primary text-3xl mb-0">Visão Geral</Headline>
-        <p className="font-serif italic text-slate-500">Acompanhe as métricas do Jornal do Interior hoje.</p>
+    <div className="flex flex-col gap-16">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4">
+        <motion.div
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent mb-2 block">Panorama Editorial</span>
+          <Headline variant="primary" className="text-primary text-6xl md:text-7xl mb-2 tracking-tighter">
+            Visão Geral_
+          </Headline>
+          <p className="font-serif italic text-slate-400 text-xl max-w-2xl">
+            Métricas de performance e engajamento do portal Journal do Interior em tempo real.
+          </p>
+        </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Stat Cards */}
-        <div className="bg-white p-6 border border-slate-200 flex flex-col gap-4 relative overflow-hidden group hover:border-accent/40 transition-colors">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <FileText size={80} />
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/5 p-2 rounded-lg text-primary">
-              <FileText size={20} />
+      {/* Stats Grid - High Contrast Monoliths */}
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 md:grid-cols-3 gap-8"
+      >
+        {stats.map((stat, i) => (
+          <motion.div 
+            key={i}
+            variants={item}
+            className="group relative bg-white border-2 border-slate-900 p-8 flex flex-col gap-6 hover:shadow-[8px_8px_0px_0px_rgba(249,115,22,1)] transition-all duration-300"
+          >
+            <div className="flex items-center justify-between">
+              <div className="p-3 border border-slate-100 bg-slate-50 group-hover:bg-accent group-hover:text-white transition-colors">
+                <stat.icon size={20} />
+              </div>
+              <ArrowUpRight size={20} className="text-slate-200 group-hover:text-accent transition-colors" />
             </div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Notícias</h3>
-          </div>
-          <p className="text-4xl font-serif italic font-black text-primary">12</p>
-          <div className="text-[10px] uppercase font-bold text-accent">+3 essa semana</div>
+            
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{stat.label}</span>
+              <p className={`text-6xl font-serif italic font-black ${stat.color} leading-none tracking-tighter`}>
+                {stat.value}
+              </p>
+            </div>
+            
+            <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
+              <span className="text-[9px] font-black uppercase tracking-widest text-accent">{stat.change}</span>
+              <div className="w-1.5 h-1.5 bg-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Quick Action Monolith */}
+      <motion.div 
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.8 }}
+        className="relative border-4 border-slate-900 bg-slate-900 p-12 md:p-20 overflow-hidden group"
+      >
+        {/* Background Texture/Pattern */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="text-[120px] font-serif font-black italic whitespace-nowrap leading-none -ml-20">
+              EDITORIAL_REDAÇÃO_INTERNAL_ACCESS_
+            </div>
+          ))}
         </div>
 
-        <div className="bg-white p-6 border border-slate-200 flex flex-col gap-4 relative overflow-hidden group hover:border-accent/40 transition-colors">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <TrendingUp size={80} />
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/5 p-2 rounded-lg text-primary">
-              <TrendingUp size={20} />
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="flex flex-col gap-6 text-center md:text-left max-w-xl">
+            <div className="flex items-center gap-3 justify-center md:justify-start">
+              <Newspaper className="text-accent" size={24} />
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-accent">Workflow Ativo</span>
             </div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Acessos Hoje</h3>
+            <h2 className="text-4xl md:text-6xl font-serif font-black italic text-white leading-tight tracking-tighter">
+              Pronto para narrar a próxima história?
+            </h2>
+            <p className="text-slate-600 text-lg md:text-xl font-serif italic">
+              Use nossa ferramenta de publicação avançada para levar a informação ao coração do interior.
+            </p>
           </div>
-          <p className="text-4xl font-serif italic font-black text-primary">1.4K</p>
-          <div className="text-[10px] uppercase font-bold text-accent">+12% vs ontem</div>
-        </div>
 
-        <div className="bg-white p-6 border border-slate-200 flex flex-col gap-4 relative overflow-hidden group hover:border-accent/40 transition-colors">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Users size={80} />
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/5 p-2 rounded-lg text-primary">
-              <Users size={20} />
-            </div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Assinaturas</h3>
-          </div>
-          <p className="text-4xl font-serif italic font-black text-primary">48</p>
-          <div className="text-[10px] uppercase font-bold text-slate-400">Total de membros ativos</div>
+          <Link href="/admin/publicar" className="group relative">
+            <div className="absolute -inset-1 bg-accent opacity-30 blur group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+            <button className="relative bg-white text-slate-950 px-12 py-6 text-xs font-black uppercase tracking-[0.4em] flex items-center gap-4 hover:bg-accent hover:text-white transition-all duration-300">
+              <Plus size={18} />
+              Criar Nova Matéria
+            </button>
+          </Link>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="mt-8 bg-white border border-slate-200 p-8 flex flex-col items-center justify-center py-20 gap-4 text-center">
-        <div className="bg-slate-50 p-4 rounded-full text-slate-400 mb-2">
-           <FileText size={24} />
+      {/* Footer Meta */}
+      <div className="flex items-center justify-between border-t border-slate-200 pt-8 mt-8">
+        <div className="flex items-center gap-4">
+           <div className="w-2 h-2 rounded-full bg-accent" />
+           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">Última sincronização do banco: Agora</span>
         </div>
-        <h3 className="font-serif font-black italic text-2xl text-primary">Pronto para publicar?</h3>
-        <p className="text-slate-500 max-w-sm">Use a ferramenta de publicação para adicionar novas matérias ao portal.</p>
-        <button className="mt-4 bg-accent text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary transition-colors">
-          Publicar Notícia +
-        </button>
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Journal do Interior Admin v2.1.0</span>
       </div>
     </div>
   );
 }
+

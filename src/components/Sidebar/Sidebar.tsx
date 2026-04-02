@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Cloud, Sun, ArrowRight, Star, Wind, Droplets, MapPin } from "lucide-react";
+import { Cloud, Sun, ArrowRight, Star, Wind, Droplets, MapPin, Send } from "lucide-react";
 import Headline from "../ui/Headline";
 import { MOCK_NEWS } from "@/lib/mock-data";
 import Link from "next/link";
@@ -42,7 +42,7 @@ export default function Sidebar() {
       {/* Weather Widget */}
       <div className="bg-white p-6 border border-slate-200 group relative">
         <div className="flex justify-between items-start mb-6">
-          <Headline variant="secondary" className="text-[9px] uppercase tracking-[0.4em] font-black text-slate-400">
+          <Headline variant="secondary" className="text-[9px] uppercase tracking-[0.4em] font-black text-slate-600">
             Céu do Sertão
           </Headline>
           <div className="flex items-center gap-1.5 text-[9px] font-sans font-black text-accent uppercase tracking-widest">
@@ -63,7 +63,7 @@ export default function Sidebar() {
               <span className="text-6xl font-serif font-black text-primary leading-none tracking-tighter">
                 {cityData.temp}
               </span>
-              <span className="text-xl font-serif font-bold text-slate-300">°C</span>
+              <span className="text-xl font-serif font-bold text-slate-400">°C</span>
             </div>
             <motion.div 
               animate={{ rotate: [0, 5, 0] }}
@@ -80,12 +80,12 @@ export default function Sidebar() {
         </AnimatePresence>
         
         <div className="mt-2 mb-6">
-          <span className="text-[11px] text-primary font-serif font-bold italic lowercase opacity-70 tracking-wide">
+          <span className="text-[11px] text-primary font-serif font-bold italic lowercase tracking-wide">
             {cityData.status}
           </span>
         </div>
         
-        <div className="pt-5 border-t border-slate-100 flex justify-between text-[9px] text-slate-400 font-sans font-black uppercase tracking-[0.2em]">
+        <div className="pt-5 border-t border-slate-100 flex justify-between text-[9px] text-slate-600 font-sans font-black uppercase tracking-[0.2em]">
           <div className="flex items-center gap-2">
             <Droplets size={12} className="text-accent" />
             <span>Umidade {cityData.humidity}%</span>
@@ -128,7 +128,7 @@ export default function Sidebar() {
                       setSelectedOption(opt.id);
                       setHasVoted(true);
                     }}
-                    className="text-left w-full p-4 border border-slate-100 text-[10px] font-sans font-black uppercase tracking-widest text-slate-500 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center group/btn"
+                    className="text-left w-full p-4 border border-slate-100 text-[10px] font-sans font-black uppercase tracking-widest text-slate-700 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center group/btn"
                   >
                     {opt.text}
                     <ArrowRight size={14} className="opacity-0 group-hover/btn:opacity-100 -translate-x-2 group-hover/btn:translate-x-0 transition-all text-accent" />
@@ -160,7 +160,7 @@ export default function Sidebar() {
                     </div>
                   </div>
                 ))}
-                <div className="pt-4 text-[9px] text-slate-300 font-sans font-black uppercase tracking-[0.3em] text-center italic">
+                <div className="pt-4 text-[9px] text-slate-500 font-sans font-black uppercase tracking-[0.3em] text-center italic">
                   Voto computado. Obrigado!
                 </div>
               </motion.div>
@@ -205,6 +205,43 @@ export default function Sidebar() {
         <span className="text-[10px] uppercase tracking-[0.4em] font-black text-slate-300 group-hover:text-slate-500 transition-colors">
           Espaço Reservado
         </span>
+      </div>
+
+      {/* Acesso Exclusivo Widget - Moved here from Hero */}
+      <div className="bg-primary p-10 text-white shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-accent" />
+        <div className="absolute -right-12 -top-12 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-accent/20 transition-all duration-1000" />
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-8">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/70">Acesso Exclusivo</h4>
+            <div className="h-px bg-white/10 flex-1" />
+          </div>
+          
+          <p className="text-xl font-serif italic text-white/90 mb-8 leading-tight">
+            Assine para receber furos e análises profundas.
+          </p>
+          
+          <div className="flex flex-col gap-4">
+            <div className="relative group/input">
+              <input 
+                type="email" 
+                placeholder="SEU MELHOR E-MAIL" 
+                className="w-full bg-white/5 border border-white/10 px-5 py-4 text-[10px] uppercase tracking-widest focus:border-accent focus:bg-white/10 outline-none transition-all pr-12"
+              />
+              <Send size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-accent transition-colors" />
+            </div>
+            
+            <button className="bg-accent text-white py-5 text-[10px] uppercase font-black tracking-[0.3em] hover:bg-white hover:text-primary transition-all duration-500 shadow-xl flex items-center justify-center gap-3">
+              Inscrever Agora
+              <ArrowRight size={14} />
+            </button>
+          </div>
+          
+          <p className="mt-6 text-[9px] text-white/40 font-sans tracking-widest uppercase text-center">
+            Privacidade garantida. Sem spam.
+          </p>
+        </div>
       </div>
     </aside>
   );

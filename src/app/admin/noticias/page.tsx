@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Headline from "@/components/ui/Headline";
-import { Edit2, Trash2, ExternalLink, Loader2, Eye, Calendar, Tag } from "lucide-react";
+import { Edit2, Trash2, ExternalLink, Loader2, Eye, Calendar, Tag, Search, Filter, Plus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function NoticiasAdminPage() {
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchNews();
@@ -17,7 +19,6 @@ export default function NoticiasAdminPage() {
 
   async function fetchNews() {
     setLoading(true);
-    // Join with categories table to get the name
     const { data, error } = await supabase
       .from("articles")
       .select(`
@@ -48,102 +49,169 @@ export default function NoticiasAdminPage() {
     }
   }
 
+  const filteredNews = news.filter(item => 
+    item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.categories?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="flex flex-col gap-10 max-w-6xl mx-auto">
-      <div className="flex flex-col gap-2 border-b border-primary/10 pb-8 flex-row items-end justify-between">
-        <div className="flex flex-col gap-2">
-          <Headline variant="primary" className="text-primary text-4xl mb-0">Matérias Publicadas</Headline>
-          <p className="font-serif italic text-slate-500 text-lg">Gerenciamento editorial de todo o conteúdo do portal.</p>
+    <div className="flex flex-col gap-16 max-w-7xl mx-auto pb-20">
+      {/* Editorial Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b-2 border-slate-900 pb-12">
+        <div className="flex flex-col gap-4">
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent mb-2 block">Acervo Editorial</span>
+            <Headline variant="primary" className="text-primary text-6xl mb-0 tracking-tighter">Matérias_</Headline>
+            <p className="font-serif italic text-slate-600 text-xl max-w-xl">
+              Gerencie todo o fluxo de informação e o histórico de publicações do portal.
+            </p>
+          </motion.div>
         </div>
-        <Link href="/admin/publicar" className="bg-accent text-white px-8 py-3 text-[10px] uppercase tracking-widest font-black hover:bg-primary transition-colors shadow-lg">
-          Nova Matéria +
+        
+        <Link href="/admin/publicar" className="group">
+          <button className="bg-slate-950 text-white px-10 py-5 text-[11px] uppercase tracking-[0.3em] font-black hover:bg-accent transition-all duration-300 shadow-[6px_6px_0px_0px_rgba(249,115,22,1)] flex items-center gap-3">
+            <Plus size={18} />
+            Nova Publicação
+          </button>
         </Link>
       </div>
 
-      <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
+      {/* Control Bar */}
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="relative flex-1 group w-full">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent transition-colors" size={20} />
+          <input 
+            type="text" 
+            placeholder="Pesquisar por título ou categoria..."
+            className="w-full bg-slate-50 border-2 border-slate-100 p-5 pl-16 text-xs font-bold uppercase tracking-widest text-primary outline-none focus:border-slate-900 transition-all placeholder:text-slate-400"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <button className="h-16 px-8 border-2 border-slate-100 bg-white flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-slate-900 hover:text-primary transition-all">
+          <Filter size={18} />
+          Filtrar
+        </button>
+      </div>
+
+      {/* Content List */}
+      <div className="flex flex-col border-t border-slate-100">
         {loading ? (
-          <div className="w-full flex items-center justify-center p-20 text-slate-400">
-             <Loader2 size={32} className="animate-spin" />
+          <div className="w-full flex flex-col items-center justify-center py-40 gap-4 text-slate-300">
+             <Loader2 size={48} className="animate-spin text-accent" />
+             <span className="text-[10px] font-black uppercase tracking-[0.3em]">Sincronizando Banco de Dados...</span>
           </div>
-        ) : news.length === 0 ? (
-          <div className="p-20 text-center flex flex-col items-center gap-4">
-            <span className="font-serif italic text-2xl text-slate-400">Nenhuma matéria publicada ainda.</span>
+        ) : filteredNews.length === 0 ? (
+          <div className="py-40 text-center flex flex-col items-center gap-6">
+            <div className="w-20 h-20 bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
+              <Search size={32} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <h3 className="font-serif font-black italic text-3xl text-primary">Nenhum registro encontrado</h3>
+              <p className="text-slate-400 font-serif italic text-lg">Tente ajustar sua busca ou publique uma nova matéria.</p>
+            </div>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-primary text-white">
-                <th className="p-4 text-[10px] font-black uppercase tracking-widest w-16">Data</th>
-                <th className="p-4 text-[10px] font-black uppercase tracking-widest">Editorial</th>
-                <th className="p-4 text-[10px] font-black uppercase tracking-widest hidden md:table-cell">Métricas</th>
-                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-right w-32">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {news.map((item) => (
-                <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50 group">
-                  <td className="p-4 align-top w-32 pt-6">
-                    <div className="flex flex-col items-start text-xs font-bold text-slate-400 uppercase tracking-widest gap-1">
-                      <Calendar size={14} className="mb-1" />
-                      <span>{new Date(item.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</span>
-                      <span className="opacity-50 text-[10px]">{new Date(item.published_at).getFullYear()}</span>
+          <div className="grid grid-cols-1 divide-y divide-slate-100">
+            <AnimatePresence mode="popLayout">
+              {filteredNews.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                  className="group relative flex flex-col md:flex-row gap-10 py-12 px-6 hover:bg-slate-50/50 transition-colors"
+                >
+                  {/* Article Index & Date */}
+                  <div className="flex flex-row md:flex-col items-baseline md:items-start gap-4 md:gap-1 w-32 shrink-0">
+                    <span className="text-[40px] font-black text-slate-900 leading-none tracking-tighter opacity-10 group-hover:opacity-20 transition-opacity">
+                      {(index + 1).toString().padStart(2, '0')}
+                    </span>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase text-accent tracking-widest">
+                        {new Date(item.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
+                        {new Date(item.published_at).getFullYear()}
+                      </span>
                     </div>
-                  </td>
-                  <td className="p-4 pt-6">
-                    <div className="flex gap-4">
-                      {item.image_url ? (
-                        <div className="w-24 h-24 bg-slate-200 relative shrink-0 border border-slate-200 grayscale group-hover:grayscale-0 transition-all duration-500">
-                          <Image src={item.image_url} alt="" fill className="object-cover" />
-                        </div>
-                      ) : (
-                        <div className="w-24 h-24 bg-slate-100 relative shrink-0 border border-slate-200 flex items-center justify-center text-slate-300">
-                           <Eye size={24} />
-                        </div>
-                      )}
-                      <div className="flex flex-col gap-2 relative">
-                        <span className="text-[9px] uppercase font-black tracking-widest text-accent flex items-center gap-1">
-                          <Tag size={10} />
-                          {item.categories?.name || "Sem Categoria"}
-                        </span>
-                        <h4 className="font-serif font-black text-xl italic text-primary leading-tight max-w-xl group-hover:text-accent transition-colors">
-                          {item.title}
-                        </h4>
-                        <p className="text-sm font-serif italic text-slate-500 line-clamp-2 max-w-xl">
-                          {item.excerpt}
-                        </p>
+                  </div>
+
+                  {/* Visual Preview */}
+                  <div className="w-full md:w-56 h-40 bg-slate-50 border border-slate-100 shrink-0 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-700 ease-in-out shadow-sm group-hover:shadow-[8px_8px_0px_0px_rgba(249,115,22,1)] group-hover:-translate-y-1">
+                    {item.image_url ? (
+                      <Image 
+                        src={item.image_url} 
+                        alt="" 
+                        fill 
+                        className="object-cover transition-transform duration-1000 group-hover:scale-110" 
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-200">
+                        <Newspaper size={40} />
+                      </div>
+                    )}
+                    {/* Category Overlay */}
+                    <div className="absolute top-4 left-4 bg-slate-900 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white z-10">
+                      {item.categories?.name || "Geral"}
+                    </div>
+                  </div>
+
+                  {/* Editorial Content */}
+                  <div className="flex-1 flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                      <h4 className="font-serif font-black text-2xl md:text-3xl italic text-primary leading-tight group-hover:text-accent transition-colors decoration-accent/0 group-hover:decoration-accent/100 decoration-2 underline-offset-8 transition-all">
+                        {item.title}
+                      </h4>
+                      <p className="text-lg font-serif italic text-slate-600 line-clamp-2 max-w-2xl leading-relaxed">
+                        {item.excerpt}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-6 mt-2 pt-6 border-t border-slate-50">
+                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                        <Eye size={14} className="text-accent" />
+                        {item.views_count} Leituras
+                      </div>
+                      <div className="w-1 h-1 rounded-full bg-slate-200" />
+                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                        <Tag size={12} />
+                        {item.categories?.name || "Sem Categoria"}
+                      </div>
+                      <div className="flex-1" />
+                      
+                      {/* Floating Actions */}
+                      <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-all duration-300 md:translate-x-4 group-hover:translate-x-0">
+                        <button className="p-3 border border-slate-100 bg-white text-slate-800 hover:text-accent hover:border-slate-950 transition-all">
+                          <Edit2 size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(item.id)}
+                          className="p-3 border border-slate-100 bg-white text-slate-600 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </div>
-                  </td>
-                  <td className="p-4 align-top pt-6 hidden md:table-cell">
-                    <div className="flex flex-col gap-1">
-                      <span className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                        <Eye size={14} className="text-slate-400" />
-                        {item.views_count} views
-                      </span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-black bg-green-100 text-green-700 w-fit mt-2">
-                        Publicado
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-4 align-top pt-6 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 bg-slate-100 text-slate-500 hover:text-accent hover:bg-slate-200 transition-colors">
-                        <Edit2 size={16} />
-                      </button>
-                      <button 
-                        className="p-2 bg-red-50 text-red-400 hover:text-white hover:bg-red-500 transition-colors"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                  </div>
+                </motion.div>
               ))}
-            </tbody>
-          </table>
+            </AnimatePresence>
+          </div>
         )}
+      </div>
+
+      {/* Footer Branding Overlay */}
+      <div className="absolute right-0 bottom-0 pointer-events-none opacity-[0.06] select-none">
+        <h2 className="text-[200px] font-black italic whitespace-nowrap -mr-20">NOTICIAS_JI</h2>
       </div>
     </div>
   );
 }
+
