@@ -6,12 +6,15 @@ import NewsCard from "../ui/NewsCard";
 import Headline from "../ui/Headline";
 
 export default function NewsFeed() {
-  const categories = ["Política", "Economia", "Cultura", "Esportes"];
+  const categories = ["Alagoas", "Brasil", "Mundo", "Esportes", "Cultura e Entretenimento"];
 
   return (
     <div className="flex flex-col gap-24 relative">
         {categories.map((cat, idx) => {
-          const catNews = MOCK_NEWS.filter(n => n.category === cat).slice(0, 3);
+          const catNews = MOCK_NEWS.filter(n => n.category.toLowerCase() === cat.toLowerCase()).slice(0, 3);
+          
+          if (catNews.length === 0) return null;
+
           const isEven = idx % 2 === 0;
 
           return (

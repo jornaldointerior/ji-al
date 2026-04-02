@@ -1,5 +1,6 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Send } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import Container from "./ui/Container";
 
 export default function Footer() {
@@ -8,11 +9,8 @@ export default function Footer() {
       <Container className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
         {/* About */}
         <div className="flex flex-col gap-6">
-          <h2 className="text-2xl font-sans font-extrabold tracking-tighter">
-            JORNAL DO <span className="text-accent underline decoration-white decoration-4 underline-offset-4">INTERIOR</span>
-          </h2>
           <p className="text-xs font-sans font-medium text-slate-300 leading-relaxed max-w-xs">
-            Desde 1985 levando a verdade e os acontecimentos mais relevantes do sertão para o seu dia a dia. Credibilidade em cada palavra.
+            Levando a verdade e os acontecimentos mais relevantes para o seu dia a dia.
           </p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-accent transition-colors"><Facebook size={18} /></a>
@@ -35,13 +33,12 @@ export default function Footer() {
         {/* Categories */}
         <div className="flex flex-col gap-6">
           <h3 className="text-sm font-sans font-black uppercase tracking-widest">Categorias</h3>
-          <ul className="grid grid-cols-2 gap-3 text-xs font-sans font-bold text-slate-300 uppercase tracking-widest">
-            <li><Link href="/categoria/politica" className="hover:text-white transition-colors">POLÍTICA</Link></li>
-            <li><Link href="/categoria/economia" className="hover:text-white transition-colors">ECONOMIA</Link></li>
-            <li><Link href="/categoria/policia" className="hover:text-white transition-colors">POLÍCIA</Link></li>
-            <li><Link href="/categoria/cultura" className="hover:text-white transition-colors">CULTURA</Link></li>
-            <li><Link href="/categoria/esportes" className="hover:text-white transition-colors">ESPORTES</Link></li>
-            <li><Link href="/categoria/eventos" className="hover:text-white transition-colors">EVENTOS</Link></li>
+          <ul className="flex flex-col gap-3 text-xs font-sans font-bold text-slate-300 uppercase tracking-widest">
+            <li><Link href="/categoria/alagoas" className="hover:text-accent transition-colors">ALAGOAS</Link></li>
+            <li><Link href="/categoria/brasil" className="hover:text-accent transition-colors">BRASIL</Link></li>
+            <li><Link href="/categoria/mundo" className="hover:text-accent transition-colors">MUNDO</Link></li>
+            <li><Link href="/categoria/esportes" className="hover:text-accent transition-colors">ESPORTES</Link></li>
+            <li><Link href="/categoria/cultura-e-entretenimento" className="hover:text-accent transition-colors">CULTURA E ENTRETENIMENTO</Link></li>
           </ul>
         </div>
 
@@ -66,7 +63,7 @@ export default function Footer() {
 
       <Container className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-sans font-bold text-slate-400">
         <p>© 2026 JORNAL DO INTERIOR. TODOS OS DIREITOS RESERVADOS.</p>
-        <p>DESENVOLVIDO POR <span className="text-white">JI AL DIGITAL</span></p>
+        <p>DESENVOLVIDO POR <a href="https://mickaaportifolio-xcsv.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-accent transition-colors">MICKA BANDEIRA</a></p>
       </Container>
     </footer>
   );

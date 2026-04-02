@@ -9,29 +9,29 @@ interface CategoryParams {
   slug: string;
 }
 
-export function generateStaticParams(): CategoryParams[] {
+export async function generateStaticParams(): Promise<CategoryParams[]> {
   return [
-    { slug: "politica" },
-    { slug: "economia" },
-    { slug: "cultura" },
+    { slug: "alagoas" },
+    { slug: "brasil" },
+    { slug: "mundo" },
     { slug: "esportes" },
-    { slug: "policia" },
-    { slug: "eventos" }
+    { slug: "cultura-e-entretenimento" }
   ];
 }
 
-export default function CategoryPage({ params }: { params: CategoryParams }) {
+export default async function CategoryPage({ params }: { params: Promise<CategoryParams> }) {
+  const { slug } = await params;
+  
   // Map slugs to display names
   const categoryMap: Record<string, string> = {
-    "politica": "Política",
-    "economia": "Economia",
-    "cultura": "Cultura",
+    "alagoas": "Alagoas",
+    "brasil": "Brasil",
+    "mundo": "Mundo",
     "esportes": "Esportes",
-    "policia": "Polícia",
-    "eventos": "Eventos"
+    "cultura-e-entretenimento": "Cultura e Entretenimento"
   };
 
-  const displayName = categoryMap[params.slug];
+  const displayName = categoryMap[slug];
   if (!displayName) {
     notFound();
   }

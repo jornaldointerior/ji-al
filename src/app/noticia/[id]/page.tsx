@@ -11,14 +11,15 @@ interface ArticleParams {
   id: string;
 }
 
-export function generateStaticParams(): ArticleParams[] {
+export async function generateStaticParams(): Promise<ArticleParams[]> {
   return MOCK_NEWS.map((news) => ({
     id: news.id,
   }));
 }
 
-export default function ArticlePage({ params }: { params: ArticleParams }) {
-  const news = getNewsById(params.id);
+export default async function ArticlePage({ params }: { params: Promise<ArticleParams> }) {
+  const { id } = await params;
+  const news = getNewsById(id);
 
   if (!news) {
     notFound();
