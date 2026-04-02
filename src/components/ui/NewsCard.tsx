@@ -65,15 +65,15 @@ export default function NewsCard({
           </Headline>
           
           {excerpt && variant !== "compact" && (
-            <p className="text-slate-500 text-[14px] line-clamp-2 font-serif italic leading-relaxed border-l border-accent/20 pl-5 mt-1">
+            <p className="text-slate-700 text-[14px] line-clamp-2 font-serif italic leading-relaxed border-l border-accent/20 pl-5 mt-1">
               {excerpt}
             </p>
           )}
         </div>
         
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-[9px] text-primary/40 uppercase font-sans font-black tracking-[0.2em] flex items-center gap-3">
-            <span className="w-8 h-[1px] bg-primary/10" />
+          <span className="text-[9px] text-primary/65 uppercase font-sans font-black tracking-[0.2em] flex items-center gap-3">
+            <span className="w-8 h-[1px] bg-primary/20" />
             {date}
           </span>
           <span className="text-[9px] text-accent font-black tracking-[0.3em] uppercase opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">

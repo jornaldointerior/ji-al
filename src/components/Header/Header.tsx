@@ -32,7 +32,7 @@ export default function Header() {
     <header className="w-full">
       {/* Top bar */}
       <div className="bg-slate-50 border-b border-slate-200 py-2 hidden md:block">
-        <Container className="flex justify-between items-center text-[11px] font-sans font-medium text-slate-500 uppercase tracking-wider">
+        <Container className="flex justify-between items-center text-[11px] font-sans font-medium text-slate-700 uppercase tracking-wider">
           <div className="flex gap-4 items-center">
             <span>{new Date().toLocaleDateString("pt-BR", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
           </div>
@@ -70,7 +70,7 @@ export default function Header() {
               <Link 
                 key={cat.name} 
                 href={cat.href}
-                className="text-[10px] uppercase font-sans font-black tracking-[0.2em] text-slate-500 hover:text-primary transition-colors relative group py-2"
+                className="text-[10px] uppercase font-sans font-black tracking-[0.2em] text-slate-700 hover:text-primary transition-colors relative group py-2"
               >
                 {cat.name}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />

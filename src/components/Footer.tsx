@@ -9,7 +9,7 @@ export default function Footer() {
       <Container className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
         {/* About */}
         <div className="flex flex-col gap-6">
-          <p className="text-xs font-sans font-medium text-slate-300 leading-relaxed max-w-xs">
+          <p className="text-xs font-sans font-medium text-slate-200 leading-relaxed max-w-xs">
             Levando a verdade e os acontecimentos mais relevantes para o seu dia a dia.
           </p>
           <div className="flex gap-4">
@@ -22,7 +22,7 @@ export default function Footer() {
         {/* Links */}
         <div className="flex flex-col gap-6">
           <h3 className="text-sm font-sans font-black uppercase tracking-widest">Institucional</h3>
-          <ul className="flex flex-col gap-3 text-xs font-sans font-bold text-slate-300">
+          <ul className="flex flex-col gap-3 text-xs font-sans font-bold text-slate-200">
             <li><a href="#" className="hover:text-white transition-colors uppercase tracking-widest">Sobre o Jornal</a></li>
             <li><a href="#" className="hover:text-white transition-colors uppercase tracking-widest">Anuncie Conosco</a></li>
             <li><a href="#" className="hover:text-white transition-colors uppercase tracking-widest">Política de Privacidade</a></li>
@@ -34,7 +34,7 @@ export default function Footer() {
         {/* Categories */}
         <div className="flex flex-col gap-6">
           <h3 className="text-sm font-sans font-black uppercase tracking-widest">Categorias</h3>
-          <ul className="flex flex-col gap-3 text-xs font-sans font-bold text-slate-300 uppercase tracking-widest">
+          <ul className="flex flex-col gap-3 text-xs font-sans font-bold text-slate-200 uppercase tracking-widest">
             <li><Link href="/categoria/alagoas" className="hover:text-accent transition-colors">ALAGOAS</Link></li>
             <li><Link href="/categoria/brasil" className="hover:text-accent transition-colors">BRASIL</Link></li>
             <li><Link href="/categoria/mundo" className="hover:text-accent transition-colors">MUNDO</Link></li>
@@ -46,7 +46,7 @@ export default function Footer() {
         {/* Newsletter */}
         <div className="flex flex-col gap-6">
           <h3 className="text-sm font-sans font-black uppercase tracking-widest">Newsletter</h3>
-          <p className="text-xs font-sans font-medium text-slate-300">
+          <p className="text-xs font-sans font-medium text-slate-200">
             Assine nossa newsletter e receba notícias em primeira mão no seu e-mail.
           </p>
           <div className="flex gap-2">
@@ -62,7 +62,7 @@ export default function Footer() {
         </div>
       </Container>
 
-      <Container className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-sans font-bold text-slate-400">
+      <Container className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-sans font-bold text-slate-300">
         <p>© 2026 JORNAL DO INTERIOR. TODOS OS DIREITOS RESERVADOS.</p>
         <p>DESENVOLVIDO POR <a href="https://mickaaportifolio-xcsv.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-accent transition-colors">MICKA BANDEIRA</a></p>
       </Container>

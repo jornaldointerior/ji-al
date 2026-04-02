@@ -38,7 +38,7 @@ export default function BreakingNews() {
                 <span className="text-primary text-[11px] font-bold font-sans tracking-wide uppercase group-hover:text-accent transition-colors">
                   {news}
                 </span>
-                <span className="text-slate-300 font-serif italic text-lg">/</span>
+                <span className="text-slate-500 font-serif italic text-lg">/</span>
               </div>
             ))}
           </motion.div>
