@@ -14,11 +14,6 @@ export default function AdminDashboard() {
     readers: { value: "0", change: "Visitantes Únicos Estimados" },
   });
   const [topArticles, setTopArticles] = useState<any[]>([]);
-  const [siteOrigin, setSiteOrigin] = useState('');
-
-  useEffect(() => {
-    setSiteOrigin(window.location.origin);
-  }, []);
 
   useEffect(() => {
     async function fetchMetrics() {
@@ -196,17 +191,15 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                  {siteOrigin && article.slug ? (
-                    <a
-                      href={`${siteOrigin}/noticia/${article.slug}/`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Abrir matéria"
-                      className="p-2.5 border border-slate-100 text-slate-400 hover:text-accent hover:border-accent transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <ExternalLink size={14} />
-                    </a>
-                  ) : null}
+                  <a
+                    href={`/noticia/${article.slug}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Abrir matéria"
+                    className="p-2.5 border border-slate-100 text-slate-400 hover:text-accent hover:border-accent transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <ExternalLink size={14} />
+                  </a>
                 </div>
               );
             })
