@@ -6,9 +6,11 @@ import { Edit2, Trash2, ExternalLink, Loader2, Eye, Calendar, Tag, Search, Filte
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function NoticiasAdminPage() {
+  const router = useRouter();
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -188,9 +190,12 @@ export default function NoticiasAdminPage() {
                       
                       {/* Floating Actions */}
                       <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-all duration-300 md:translate-x-4 group-hover:translate-x-0">
-                        <Link href={`/admin/noticias/editar?id=${item.id}`} className="p-3 border border-slate-100 bg-white text-slate-800 hover:text-accent hover:border-slate-950 transition-all">
+                        <button 
+                          onClick={() => router.push(`/admin/noticias/editar?id=${item.id}`)} 
+                          className="p-3 border border-slate-100 bg-white text-slate-800 hover:text-accent hover:border-slate-950 transition-all"
+                        >
                           <Edit2 size={16} />
-                        </Link>
+                        </button>
                         <button 
                           onClick={() => handleDelete(item.id)}
                           className="p-3 border border-slate-100 bg-white text-slate-600 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all"

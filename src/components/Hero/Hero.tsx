@@ -87,6 +87,11 @@ export default function Hero() {
             <div className="lg:col-span-4 flex flex-col gap-10">
               <div className="bg-white p-6 md:p-8 border border-slate-200 shadow-sm reveal-up stagger-3">
                 <div className="flex flex-col gap-8">
+                  <div className="border-b border-slate-100 pb-4 mb-2">
+                    <Headline variant="accent" className="text-[10px] uppercase font-black tracking-[0.4em]">
+                      Últimas Notícias
+                    </Headline>
+                  </div>
                   {sideNews.map((news, i) => (
                     <Link 
                       key={news.id} 
