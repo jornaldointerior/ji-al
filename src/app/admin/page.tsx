@@ -15,6 +15,12 @@ export default function AdminDashboard() {
   });
   const [topArticles, setTopArticles] = useState<any[]>([]);
 
+  // Abre matéria em nova aba sem ser interceptado pelo roteador SPA
+  const openArticle = (slug: string) => {
+    const base = typeof window !== 'undefined' ? window.location.origin : '';
+    window.open(`${base}/noticia/${slug}/`, '_blank', 'noopener,noreferrer');
+  };
+
   useEffect(() => {
     async function fetchMetrics() {
       const { count: articlesCount } = await supabase
@@ -190,15 +196,13 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                  <a
-                    href={`/noticia/${article.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => openArticle(article.slug)}
                     title="Abrir matéria"
                     className="p-2.5 border border-slate-100 text-slate-400 hover:text-accent hover:border-accent transition-all opacity-0 group-hover:opacity-100"
                   >
                     <ExternalLink size={14} />
-                  </a>
+                  </button>
                 </div>
               );
             })
