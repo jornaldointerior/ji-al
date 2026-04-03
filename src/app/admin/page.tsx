@@ -52,21 +52,24 @@ export default function AdminDashboard() {
       value: metrics.articles.value.toString(), 
       change: metrics.articles.change, 
       icon: FileText,
-      color: "text-primary"
+      color: "text-primary",
+      href: "/admin/noticias"
     },
     { 
       label: "Audiência Digital", 
       value: metrics.views.value, 
       change: metrics.views.change, 
       icon: TrendingUp,
-      color: "text-accent"
+      color: "text-accent",
+      href: "/admin/acessos"
     },
     { 
       label: "Leitores Ativos", 
       value: metrics.readers.value, 
       change: metrics.readers.change, 
       icon: Users,
-      color: "text-primary"
+      color: "text-primary",
+      href: "/admin/acessos"
     },
   ];
 
@@ -112,30 +115,35 @@ export default function AdminDashboard() {
         className="grid grid-cols-1 md:grid-cols-3 gap-8"
       >
         {stats.map((stat, i) => (
-          <motion.div 
+          <Link 
             key={i}
-            variants={item}
-            className="group relative bg-white border-2 border-slate-900 p-8 flex flex-col gap-6 hover:shadow-[8px_8px_0px_0px_rgba(249,115,22,1)] transition-all duration-300"
+            href={stat.href}
+            className="group"
           >
-            <div className="flex items-center justify-between">
-              <div className="p-3 border border-slate-100 bg-slate-50 group-hover:bg-accent group-hover:text-white transition-colors">
-                <stat.icon size={20} />
+            <motion.div 
+              variants={item}
+              className="relative bg-white border-2 border-slate-900 p-8 flex flex-col gap-6 hover:shadow-[8px_8px_0px_0px_rgba(249,115,22,1)] transition-all duration-300 h-full"
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-3 border border-slate-100 bg-slate-50 group-hover:bg-accent group-hover:text-white transition-colors">
+                  <stat.icon size={20} />
+                </div>
+                <ArrowUpRight size={20} className="text-slate-200 group-hover:text-accent transition-colors" />
               </div>
-              <ArrowUpRight size={20} className="text-slate-200 group-hover:text-accent transition-colors" />
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{stat.label}</span>
-              <p className={`text-6xl font-serif italic font-black ${stat.color} leading-none tracking-tighter`}>
-                {stat.value}
-              </p>
-            </div>
-            
-            <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-              <span className="text-[9px] font-black uppercase tracking-widest text-accent">{stat.change}</span>
-              <div className="w-1.5 h-1.5 bg-accent opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </motion.div>
+              
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{stat.label}</span>
+                <p className={`text-6xl font-serif italic font-black ${stat.color} leading-none tracking-tighter`}>
+                  {stat.value}
+                </p>
+              </div>
+              
+              <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
+                <span className="text-[9px] font-black uppercase tracking-widest text-accent">{stat.change}</span>
+                <div className="w-1.5 h-1.5 bg-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </motion.div>
+          </Link>
         ))}
       </motion.div>
 

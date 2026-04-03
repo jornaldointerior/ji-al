@@ -125,6 +125,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/admin/noticias", icon: FileText, label: "Gerenciar" },
     { href: "/admin/publicar", icon: PenSquare, label: "Publicar" },
+    { href: "/admin/acessos", icon: Activity, label: "Acessos" },
   ];
 
   const effectiveWidth = isCollapsed ? MIN_WIDTH : sidebarWidth;

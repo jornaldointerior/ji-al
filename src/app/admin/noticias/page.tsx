@@ -171,12 +171,15 @@ export default function NoticiasAdminPage() {
 
                     {/* Actions row */}
                     <div className="flex items-center gap-4 mt-auto pt-6 border-t border-slate-50 flex-wrap">
-                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">
-                        <Eye size={14} className="text-accent" />
-                        {item.views_count || 0} Leituras
-                      </div>
+                      <Link 
+                        href="/admin/acessos"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-accent hover:text-white transition-all text-[9px] font-black uppercase tracking-widest text-slate-600 rounded-sm group/views"
+                      >
+                        <Eye size={14} className="text-accent group-hover/views:text-white transition-colors" />
+                        {item.views_count || 0} Acessos
+                      </Link>
                       <div className="w-1 h-1 rounded-full bg-slate-200" />
-                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                         <Tag size={12} />
                         {item.categories?.name || "Sem Categoria"}
                       </div>
