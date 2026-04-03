@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
@@ -14,16 +14,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     // Reset state on initialization
     setLoading(false);
-  });
+    setSuccess(false);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSuccess(false);
     setError(null);
 
     try {
@@ -34,6 +37,7 @@ export default function LoginPage() {
 
       if (authError) throw authError;
 
+      setSuccess(true);
       // Usar replace para evitar que o usuário volte ao formulário de login via histórico
       router.replace("/admin/");
     } catch (err: any) {
@@ -114,13 +118,30 @@ export default function LoginPage() {
               </motion.div>
             )}
 
+            {success && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-green-50 border-l-4 border-green-500 p-4 flex items-start gap-3 mt-2"
+              >
+                <div className="bg-green-500 rounded-full p-1">
+                  <LogIn size={12} className="text-white" />
+                </div>
+                <p className="text-[11px] font-sans font-bold text-green-700 leading-relaxed uppercase tracking-wider">
+                  Acesso Autorizado! Redirecionando...
+                </p>
+              </motion.div>
+            )}
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || success}
               className="mt-4 w-full bg-primary text-white py-5 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-accent transition-all duration-500 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group shadow-xl"
             >
               {loading ? (
                 <Loader2 size={16} className="animate-spin" />
+              ) : success ? (
+                "Entrando..."
               ) : (
                 <>
                   Entrar no Sistema

@@ -11,43 +11,50 @@ export default function AdminAuthWrapper({ children }: { children: React.ReactNo
 
   useEffect(() => {
     // Redirecionamento seguro usando o router do Next.js
-    function redirectToLogin() {
-      router.push("/login/");
-    }
+    const redirectToLogin = () => {
+      router.replace("/login/");
+    };
 
-    // Primeiro check de sessão
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        // Pequeno atraso para mitigar condições de corrida no roteamento/cookies
-        setTimeout(async () => {
-          const { data: { session: secondSession } } = await supabase.auth.getSession();
-          if (!secondSession) {
+    // Registrar o listener de autenticação primeiro
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // console.log("Auth Event:", event, !!session); // Debug em produção se necessário
+
+      if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+        if (session) {
+          setLoading(false);
+        } else {
+          // Se não houver sessão no INITIAL_SESSION, tentamos um check final por precaução
+          const { data: { session: currentSession } } = await supabase.auth.getSession();
+          if (!currentSession) {
             redirectToLogin();
           } else {
             setLoading(false);
           }
-        }, 500);
-      } else {
-        setLoading(false);
+        }
       }
-    };
 
-    checkSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
         setLoading(true);
         redirectToLogin();
       }
-      if (event === "SIGNED_IN" && session) {
-        setLoading(false);
-      }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Timeout de segurança: Se nada acontecer em 1.5s, forçamos um check final
+    // Útil para redes muito lentas onde o evento INITIAL_SESSION pode demorar
+    const safetyTimeout = setTimeout(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        redirectToLogin();
+      } else {
+        setLoading(false);
+      }
+    }, 1500);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(safetyTimeout);
+    };
+  }, [router]);
 
   if (loading) {
     return (
