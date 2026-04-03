@@ -1,25 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
 
 export default function AdminAuthWrapper({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    // Hard redirect — window.location garante navegação real no static export
+    // Redirecionamento seguro usando o router do Next.js
     function redirectToLogin() {
-      window.location.href = "/login/";
+      router.push("/login/");
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Primeiro check de sessão
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
-        redirectToLogin();
+        // Pequeno atraso para mitigar condições de corrida no roteamento/cookies
+        setTimeout(async () => {
+          const { data: { secondCheck } } = await supabase.auth.getSession() as any;
+          if (!secondCheck) {
+            redirectToLogin();
+          } else {
+            setLoading(false);
+          }
+        }, 500);
       } else {
         setLoading(false);
       }
-    });
+    };
+
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
@@ -29,7 +44,6 @@ export default function AdminAuthWrapper({ children }: { children: React.ReactNo
       if (event === "SIGNED_IN" && session) {
         setLoading(false);
       }
-      // Ignorar INITIAL_SESSION, TOKEN_REFRESHED, etc. — apenas agir em eventos explícitos
     });
 
     return () => subscription.unsubscribe();

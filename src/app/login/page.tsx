@@ -29,12 +29,11 @@ export default function LoginPage() {
 
       if (authError) throw authError;
 
-      router.push("/admin");
-      router.refresh();
+      // Usar replace para evitar que o usuário volte ao formulário de login via histórico
+      router.replace("/admin/");
     } catch (err: any) {
-      setError(err.message || "Erro ao realizar login. Verifique suas credenciais.");
-    } finally {
       setLoading(false);
+      setError(err.message || "Erro ao realizar login. Verifique suas credenciais.");
     }
   };
 
