@@ -50,6 +50,6 @@ jobs:
           set net:max-retries 3;
           open $FTP_SERVER;
           user $FTP_USERNAME $FTP_PASSWORD;
-          mirror --reverse --only-newer --parallel=5 --no-perms ./out/ ./;
+          mirror --reverse --delete --parallel=5 --no-perms ./out/ ./public_html/;
           bye
           "
