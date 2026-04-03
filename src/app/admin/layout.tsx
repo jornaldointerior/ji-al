@@ -192,33 +192,37 @@ export default function AdminLayout({
             </div>
           </header>
 
-          {/* Page Content with Staggered Reveal */}
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
-            className="p-12 w-full max-w-[1400px] mx-auto flex-1 selection:bg-accent selection:text-white"
-          >
-            {children}
-          </motion.div>
+          {/* Page Content with per-route animation */}
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.4, ease: [0.33, 1, 0.68, 1] }}
+              className="p-12 w-full max-w-[1400px] mx-auto flex-1 selection:bg-accent selection:text-white"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
 
-        {/* Global Search Modal */}
+        {/* Global Search Modal — backdrop IS the motion element to avoid invisible overlays */}
         <AnimatePresence>
           {isSearchOpen && (
-            <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
+            <>
               <motion.div 
                 initial={{ opacity: 0 }} 
                 animate={{ opacity: 1 }} 
                 exit={{ opacity: 0 }} 
                 onClick={() => setIsSearchOpen(false)}
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
+                className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md" 
               />
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95, y: -20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                className="relative w-full max-w-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden z-10"
+                className="fixed left-1/2 -translate-x-1/2 top-[15vh] w-full max-w-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden z-[101]"
               >
                 <div className="flex items-center gap-4 px-6 py-4 border-b border-slate-100">
                   <Search size={20} className="text-slate-400" />
@@ -259,27 +263,27 @@ export default function AdminLayout({
                   ) : null}
                 </div>
               </motion.div>
-            </div>
+            </>
           )}
         </AnimatePresence>
 
-        {/* Global Notifications Drawer */}
+        {/* Global Notifications Drawer — backdrop IS the motion element to avoid invisible overlays */}
         <AnimatePresence>
           {isNotificationsOpen && (
-            <div className="fixed inset-0 z-[100] flex justify-end">
+            <>
               <motion.div 
                 initial={{ opacity: 0 }} 
                 animate={{ opacity: 1 }} 
                 exit={{ opacity: 0 }} 
                 onClick={() => setIsNotificationsOpen(false)}
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+                className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm" 
               />
               <motion.div 
                 initial={{ x: "100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="relative w-full max-w-sm bg-white h-full shadow-2xl border-l border-slate-200 z-10 flex flex-col"
+                className="fixed right-0 top-0 w-full max-w-sm bg-white h-full shadow-2xl border-l border-slate-200 z-[101] flex flex-col"
               >
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                   <h3 className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-3">
@@ -291,19 +295,16 @@ export default function AdminLayout({
                   </button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
-                  {/* Mock Notifications Data */}
                   <div className="flex flex-col gap-2 relative pl-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-px before:bg-slate-200">
                     <div className="absolute left-1 top-2 w-2.5 h-2.5 rounded-full bg-accent ring-4 ring-white" />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Agora</span>
                     <p className="text-sm font-serif italic text-slate-700">Deploy concluído com sucesso. Suas páginas estáticas foram atualizadas globalmente.</p>
                   </div>
-                  
                   <div className="flex flex-col gap-2 relative pl-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-px before:bg-slate-200">
                     <div className="absolute left-1 top-2 w-2.5 h-2.5 rounded-full bg-green-500 ring-4 ring-white" />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Há 2 horas</span>
                     <p className="text-sm font-serif italic text-slate-700">Novo acesso gerencial detectado no painel a partir do IP local.</p>
                   </div>
-                  
                   <div className="flex flex-col gap-2 relative pl-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-px before:bg-slate-100">
                     <div className="absolute left-1 top-2 w-2.5 h-2.5 rounded-full bg-slate-300 ring-4 ring-white" />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Ontem</span>
@@ -314,7 +315,7 @@ export default function AdminLayout({
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 cursor-pointer hover:text-accent transition-colors">Marcar todas como lidas</span>
                 </div>
               </motion.div>
-            </div>
+            </>
           )}
         </AnimatePresence>
       </div>

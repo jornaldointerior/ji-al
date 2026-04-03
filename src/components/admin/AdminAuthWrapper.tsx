@@ -10,18 +10,29 @@ export default function AdminAuthWrapper({ children }: { children: React.ReactNo
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+    // Check initial session once on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         router.push("/login");
       } else {
         setLoading(false);
       }
-    };
+    });
 
-    checkAuth();
-  }, [router]);
+    // Listen for auth state changes (logout, token refresh, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
+        setLoading(true);
+        router.push("/login");
+      }
+      if (event === "SIGNED_IN" && session) {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps: only run once on mount — NOT on every router change
 
   if (loading) {
     return (
