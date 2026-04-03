@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Headline from "@/components/ui/Headline";
-import { Edit2, Trash2, ExternalLink, Loader2, Eye, Calendar, Tag, Search, Filter, Plus, Newspaper } from "lucide-react";
+import { Edit2, Trash2, ExternalLink, Loader2, Eye, Tag, Search, Filter, Plus, Newspaper } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,16 +14,17 @@ export default function NoticiasAdminPage() {
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-
-  // URL base do site — window.location.origin garante que funciona em dev e em produção
-  const openArticle = (slug: string) => {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    window.open(`${base}/noticia/${slug}/`, '_blank', 'noopener,noreferrer');
-  };
+  // Calculado via useEffect para evitar SSR — garante URL absoluta correta
+  const [siteOrigin, setSiteOrigin] = useState("");
 
   useEffect(() => {
+    setSiteOrigin(window.location.origin);
     fetchNews();
   }, []);
+
+  function articleUrl(slug: string) {
+    return `${siteOrigin}/noticia/${slug}/`;
+  }
 
   async function fetchNews() {
     setLoading(true);
@@ -58,7 +59,7 @@ export default function NoticiasAdminPage() {
     }
   }
 
-  const filteredNews = news.filter(item => 
+  const filteredNews = news.filter(item =>
     item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.categories?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -80,7 +81,7 @@ export default function NoticiasAdminPage() {
             </p>
           </motion.div>
         </div>
-        
+
         <Link href="/admin/publicar" className="group">
           <div className="bg-slate-950 text-white px-10 py-5 text-[11px] uppercase tracking-[0.3em] font-black hover:bg-accent transition-all duration-300 shadow-[6px_6px_0px_0px_rgba(249,115,22,1)] flex items-center gap-3">
             <Plus size={18} />
@@ -93,8 +94,8 @@ export default function NoticiasAdminPage() {
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="relative flex-1 group w-full">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent transition-colors" size={20} />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Pesquisar por título ou categoria..."
             className="w-full bg-slate-50 border-2 border-slate-100 p-5 pl-16 text-xs font-bold uppercase tracking-widest text-primary outline-none focus:border-slate-900 transition-all placeholder:text-slate-400"
             value={searchTerm}
@@ -111,8 +112,8 @@ export default function NoticiasAdminPage() {
       <div className="flex flex-col border-t border-slate-100">
         {loading ? (
           <div className="w-full flex flex-col items-center justify-center py-40 gap-4 text-slate-300">
-             <Loader2 size={48} className="animate-spin text-accent" />
-             <span className="text-[10px] font-black uppercase tracking-[0.3em]">Sincronizando Banco de Dados...</span>
+            <Loader2 size={48} className="animate-spin text-accent" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Sincronizando Banco de Dados...</span>
           </div>
         ) : filteredNews.length === 0 ? (
           <div className="py-40 text-center flex flex-col items-center gap-6">
@@ -155,18 +156,17 @@ export default function NoticiasAdminPage() {
                   {/* Visual Preview */}
                   <div className="w-full md:w-56 h-40 bg-slate-50 border border-slate-100 shrink-0 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-700 ease-in-out shadow-sm group-hover:shadow-[8px_8px_0px_0px_rgba(249,115,22,1)] group-hover:-translate-y-1">
                     {item.image_url ? (
-                      <Image 
-                        src={item.image_url} 
-                        alt="" 
-                        fill 
-                        className="object-cover transition-transform duration-1000 group-hover:scale-110" 
+                      <Image
+                        src={item.image_url}
+                        alt=""
+                        fill
+                        className="object-cover transition-transform duration-1000 group-hover:scale-110"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-200">
                         <Newspaper size={40} />
                       </div>
                     )}
-                    {/* Category Overlay */}
                     <div className="absolute top-4 left-4 bg-slate-900 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white z-10">
                       {item.categories?.name || "Geral"}
                     </div>
@@ -175,21 +175,30 @@ export default function NoticiasAdminPage() {
                   {/* Editorial Content */}
                   <div className="flex-1 flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
-                      <button
-                        onClick={() => openArticle(item.slug)}
-                        className="font-serif font-black text-2xl md:text-3xl italic text-primary leading-tight hover:text-accent transition-colors text-left"
-                      >
-                        {item.title}
-                      </button>
+                      {/* Âncora nativa com href absoluto — não é interceptada pelo roteador SPA */}
+                      {siteOrigin && item.slug ? (
+                        <a
+                          href={articleUrl(item.slug)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-serif font-black text-2xl md:text-3xl italic text-primary leading-tight hover:text-accent transition-colors underline-offset-8 hover:underline decoration-accent"
+                        >
+                          {item.title}
+                        </a>
+                      ) : (
+                        <span className="font-serif font-black text-2xl md:text-3xl italic text-primary leading-tight">
+                          {item.title}
+                        </span>
+                      )}
                       <p className="text-lg font-serif italic text-slate-600 line-clamp-2 max-w-2xl leading-relaxed">
                         {item.excerpt}
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-6 mt-2 pt-6 border-t border-slate-50">
+                    <div className="flex items-center gap-4 mt-2 pt-6 border-t border-slate-50 flex-wrap">
                       <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">
                         <Eye size={14} className="text-accent" />
-                        {item.views_count} Leituras
+                        {item.views_count || 0} Leituras
                       </div>
                       <div className="w-1 h-1 rounded-full bg-slate-200" />
                       <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">
@@ -197,25 +206,32 @@ export default function NoticiasAdminPage() {
                         {item.categories?.name || "Sem Categoria"}
                       </div>
                       <div className="flex-1" />
-                      
-                      {/* Floating Actions */}
-                      <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-all duration-300 md:translate-x-4 group-hover:translate-x-0">
+
+                      {/* Actions — sempre visíveis */}
+                      <div className="flex items-center gap-2">
+                        {siteOrigin && item.slug && (
+                          <a
+                            href={articleUrl(item.slug)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Abrir matéria no portal"
+                            className="flex items-center gap-2 px-4 py-2.5 border border-accent text-accent text-[9px] font-black uppercase tracking-widest hover:bg-accent hover:text-white transition-all"
+                          >
+                            <ExternalLink size={13} />
+                            Ver
+                          </a>
+                        )}
                         <button
-                          onClick={() => openArticle(item.slug)}
-                          title="Ver matéria publicada"
-                          className="p-3 border border-slate-100 bg-white text-slate-600 hover:text-accent hover:border-accent transition-all"
-                        >
-                          <ExternalLink size={16} />
-                        </button>
-                        <button 
-                          onClick={() => router.push(`/admin/noticias/editar?id=${item.id}`)} 
-                          className="p-3 border border-slate-100 bg-white text-slate-800 hover:text-accent hover:border-slate-950 transition-all"
+                          onClick={() => router.push(`/admin/noticias/editar?id=${item.id}`)}
+                          title="Editar matéria"
+                          className="p-3 border border-slate-200 bg-white text-slate-600 hover:text-accent hover:border-accent transition-all"
                         >
                           <Edit2 size={16} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDelete(item.id)}
-                          className="p-3 border border-slate-100 bg-white text-slate-600 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all"
+                          title="Apagar matéria"
+                          className="p-3 border border-slate-200 bg-white text-slate-600 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -228,12 +244,6 @@ export default function NoticiasAdminPage() {
           </div>
         )}
       </div>
-
-      {/* Footer Branding Overlay */}
-      <div className="absolute right-0 bottom-0 pointer-events-none opacity-[0.06] select-none">
-        <h2 className="text-[200px] font-black italic whitespace-nowrap -mr-20">NOTICIAS_JI</h2>
-      </div>
     </div>
   );
 }
-
