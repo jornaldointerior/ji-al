@@ -1,20 +1,62 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { MOCK_NEWS } from "@/lib/mock-data";
+import { supabase } from "@/lib/supabase";
 import Container from "../ui/Container";
 import Headline from "../ui/Headline";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 export default function Hero() {
-  const mainNews = MOCK_NEWS[0];
-  const sideNews = MOCK_NEWS.slice(1, 4);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchHeroNews() {
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          id,
+          title,
+          excerpt,
+          image_url,
+          published_at,
+          slug,
+          categories (name)
+        `)
+        .order("published_at", { ascending: false })
+        .limit(4);
+
+      if (data && !error) {
+        setArticles(data);
+      }
+      setLoading(false);
+    }
+
+    fetchHeroNews();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[600px] flex items-center justify-center bg-slate-50 border-b border-primary/5">
+        <Loader2 className="animate-spin text-accent" size={48} />
+      </div>
+    );
+  }
+
+  if (articles.length === 0) return null;
+
+  const mainNews = articles[0];
+  const sideNews = articles.slice(1);
 
   return (
     <section className="relative pt-10 pb-16 overflow-hidden border-b border-primary/5">
       <Container>
         <div className="flex flex-col gap-20">
-          {/* Typographic Header Section - Optimized for impact and accessibility */}
+          {/* Typographic Header Section */}
           <div className="relative w-full reveal-up">
-            <Link href={mainNews.href} className="group cursor-pointer w-full block">
+            <Link href={`/noticia/${mainNews.slug}`} className="group cursor-pointer w-full block">
               <Headline 
                 variant="massive" 
                 className="stagger-2 group-hover:text-accent transition-colors duration-500 text-[clamp(2.5rem,8vw,10rem)] leading-[0.95] w-full text-left tracking-tight break-words h-auto"
@@ -26,12 +68,11 @@ export default function Hero() {
 
           {/* Asymmetric Visual & News Grid */}
           <div className="grid lg:grid-cols-12 gap-12 items-start">
-            {/* Main Visual - Now Expanded to col-span-8 */}
             <div className="lg:col-span-8 relative h-[300px] md:h-[540px] w-full reveal-up stagger-3">
               <div className="absolute -inset-4 bg-slate-50/50 -z-10 translate-x-4 translate-y-4 border border-primary/5 hidden md:block" />
               <div className="h-full w-full overflow-hidden border border-primary/10">
                 <Image
-                  src={mainNews.image}
+                  src={mainNews.image_url || "/placeholder-news.jpg"}
                   alt={mainNews.title}
                   fill
                   className="object-cover transition-transform duration-1000 hover:scale-105"
@@ -43,19 +84,17 @@ export default function Hero() {
               </p>
             </div>
 
-            {/* Side Fragments - Now col-span-4, styled as Sidebar Widgets */}
             <div className="lg:col-span-4 flex flex-col gap-10">
-              {/* News List Widget */}
               <div className="bg-white p-6 md:p-8 border border-slate-200 shadow-sm reveal-up stagger-3">
                 <div className="flex flex-col gap-8">
                   {sideNews.map((news, i) => (
                     <Link 
                       key={news.id} 
-                      href={news.href}
+                      href={`/noticia/${news.slug}`}
                       className="flex flex-col gap-2 group border-b border-slate-50 pb-6 last:border-0 last:pb-0"
                     >
                       <span className="text-[9px] uppercase font-black tracking-widest text-accent mb-1">
-                        0{i + 1} / {news.category}
+                        0{i + 1} / {news.categories?.name}
                       </span>
                       <h4 className="text-lg font-serif font-black leading-tight group-hover:text-accent transition-colors duration-300">
                         {news.title}

@@ -1,26 +1,22 @@
-import { getNewsByCategory } from "@/lib/mock-data";
+"use client";
+
+import { useState, useEffect, use } from "react";
 import { notFound } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import Container from "@/components/ui/Container";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import NewsCard from "@/components/ui/NewsCard";
 import Headline from "@/components/ui/Headline";
+import { Loader2 } from "lucide-react";
 
 interface CategoryParams {
   slug: string;
 }
 
-export async function generateStaticParams(): Promise<CategoryParams[]> {
-  return [
-    { slug: "alagoas" },
-    { slug: "brasil" },
-    { slug: "mundo" },
-    { slug: "esportes" },
-    { slug: "cultura-e-entretenimento" }
-  ];
-}
-
-export default async function CategoryPage({ params }: { params: Promise<CategoryParams> }) {
-  const { slug } = await params;
+export default function CategoryPage({ params }: { params: Promise<CategoryParams> }) {
+  const { slug } = use(params);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Map slugs to display names
   const categoryMap: Record<string, string> = {
@@ -32,11 +28,44 @@ export default async function CategoryPage({ params }: { params: Promise<Categor
   };
 
   const displayName = categoryMap[slug];
+
+  useEffect(() => {
+    async function fetchCategoryNews() {
+      if (!displayName) {
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          categories!inner (name)
+        `)
+        .eq("categories.name", displayName)
+        .order("published_at", { ascending: false });
+
+      if (data && !error) {
+        setArticles(data);
+      }
+      setLoading(false);
+    }
+
+    fetchCategoryNews();
+  }, [slug, displayName]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-4">
+        <Loader2 className="animate-spin text-accent" size={48} />
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Carregando Categoria...</span>
+      </div>
+    );
+  }
+
   if (!displayName) {
     notFound();
   }
-
-  const articles = getNewsByCategory(displayName);
 
   return (
     <main className="py-10 bg-white min-h-screen">
@@ -56,7 +85,12 @@ export default async function CategoryPage({ params }: { params: Promise<Categor
             {articles.map((news) => (
               <NewsCard
                 key={news.id}
-                {...news}
+                title={news.title}
+                excerpt={news.excerpt}
+                image={news.image_url || "/placeholder-news.jpg"}
+                category={news.categories?.name || displayName}
+                date={new Date(news.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
+                href={`/noticia/${news.slug}`}
                 variant="vertical"
                 className="h-full border-0 p-0 shadow-none hover:shadow-xl transition-all"
               />
