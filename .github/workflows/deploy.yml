@@ -48,6 +48,6 @@ jobs:
           set ssl:verify-certificate no;
           open $FTP_SERVER;
           user $FTP_USERNAME $FTP_PASSWORD;
-          mirror --reverse --delete --verbose ./out/ ./public_html/;
+          mirror --reverse --verbose ./out/ ./;
           bye
           "
