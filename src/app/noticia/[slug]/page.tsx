@@ -33,11 +33,8 @@ export default function ArticlePage({ params }: { params: Promise<ArticleParams>
       if (data && !error) {
         setNews(data);
         
-        // Increment view count (silently)
-        await supabase
-          .from("articles")
-          .update({ views_count: (data.views_count || 0) + 1 })
-          .eq("id", data.id);
+        // Increment view count securely via RPC instead of raw update to avoid race conditions
+        await supabase.rpc('increment_view_count', { article_id: data.id });
       }
       setLoading(false);
     }

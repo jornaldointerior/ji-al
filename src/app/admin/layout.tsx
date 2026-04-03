@@ -1,8 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, FileText, PenSquare, Home, Settings, LogOut, Activity, Bell, Search } from "lucide-react";
+import { LayoutDashboard, FileText, PenSquare, Home, Settings, LogOut, Activity, Bell, Search, X, ChevronRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import AdminAuthWrapper from "@/components/admin/AdminAuthWrapper";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,6 +15,39 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const searchArticles = async () => {
+      if (searchQuery.trim().length > 2) {
+        const { data } = await supabase
+          .from('articles')
+          .select('id, title, categories(name)')
+          .ilike('title', `%${searchQuery}%`)
+          .limit(5);
+        setSearchResults(data || []);
+      } else {
+        setSearchResults([]);
+      }
+    };
+    const debounce = setTimeout(searchArticles, 300);
+    return () => clearTimeout(debounce);
+  }, [searchQuery]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -139,12 +173,18 @@ export default function AdminLayout({
             </div>
 
             <div className="flex items-center gap-6">
-              <div className="relative group cursor-pointer">
+              <div 
+                className="relative group cursor-pointer"
+                onClick={() => setIsNotificationsOpen(true)}
+              >
                 <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-accent text-[8px] font-black text-white flex items-center justify-center animate-bounce z-10">3</div>
                 <Bell size={20} className="text-slate-600 group-hover:text-primary transition-colors" />
               </div>
-              <div className="w-px h-8 bg-slate-100mx-2" />
-              <button className="flex items-center gap-3 bg-slate-50 border border-slate-200 px-6 py-2.5 group hover:border-primary transition-all">
+              <div className="w-px h-8 bg-slate-100 mx-2" />
+              <button 
+                onClick={() => setIsSearchOpen(true)}
+                className="flex items-center gap-3 bg-slate-50 border border-slate-200 px-6 py-2.5 group hover:border-primary transition-all"
+              >
                 <Search size={16} className="text-slate-600 group-hover:text-primary transition-colors" />
                 <span className="text-[9px] font-black uppercase tracking-widest text-slate-600">Pesquisar Matéria...</span>
                 <span className="text-[9px] font-bold text-slate-500 ml-4 border border-slate-200 px-1 py-0.5 group-hover:border-slate-300">⌘K</span>
@@ -162,6 +202,121 @@ export default function AdminLayout({
             {children}
           </motion.div>
         </main>
+
+        {/* Global Search Modal */}
+        <AnimatePresence>
+          {isSearchOpen && (
+            <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }} 
+                onClick={() => setIsSearchOpen(false)}
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                className="relative w-full max-w-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden z-10"
+              >
+                <div className="flex items-center gap-4 px-6 py-4 border-b border-slate-100">
+                  <Search size={20} className="text-slate-400" />
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Pesquisar por notícias..."
+                    className="flex-1 bg-transparent text-lg text-slate-900 outline-none placeholder:text-slate-300 font-serif italic"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <button onClick={() => setIsSearchOpen(false)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="max-h-[60vh] overflow-y-auto w-full p-2">
+                  {searchResults.length > 0 ? (
+                    searchResults.map(result => (
+                      <div 
+                        key={result.id}
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          router.push(`/admin/noticias/editar?id=${result.id}`);
+                        }}
+                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 group"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-accent">{result.categories?.name || "Editorial"}</span>
+                          <span className="font-serif italic font-bold text-slate-800 group-hover:text-primary transition-colors">{result.title}</span>
+                        </div>
+                        <ChevronRight size={18} className="text-slate-300 group-hover:text-accent transition-colors md:opacity-0 group-hover:opacity-100" />
+                      </div>
+                    ))
+                  ) : searchQuery.length > 2 ? (
+                    <div className="p-8 text-center text-slate-400 font-serif italic">
+                      Nenhuma matéria encontrada.
+                    </div>
+                  ) : null}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Global Notifications Drawer */}
+        <AnimatePresence>
+          {isNotificationsOpen && (
+            <div className="fixed inset-0 z-[100] flex justify-end">
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }} 
+                onClick={() => setIsNotificationsOpen(false)}
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+              />
+              <motion.div 
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="relative w-full max-w-sm bg-white h-full shadow-2xl border-l border-slate-200 z-10 flex flex-col"
+              >
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-3">
+                    <Bell size={16} className="text-accent" />
+                    Notificações
+                  </h3>
+                  <button onClick={() => setIsNotificationsOpen(false)} className="p-2 text-slate-400 hover:text-slate-900 bg-white border border-slate-200 transition-all">
+                    <X size={16} />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+                  {/* Mock Notifications Data */}
+                  <div className="flex flex-col gap-2 relative pl-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-px before:bg-slate-200">
+                    <div className="absolute left-1 top-2 w-2.5 h-2.5 rounded-full bg-accent ring-4 ring-white" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Agora</span>
+                    <p className="text-sm font-serif italic text-slate-700">Deploy concluído com sucesso. Suas páginas estáticas foram atualizadas globalmente.</p>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2 relative pl-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-px before:bg-slate-200">
+                    <div className="absolute left-1 top-2 w-2.5 h-2.5 rounded-full bg-green-500 ring-4 ring-white" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Há 2 horas</span>
+                    <p className="text-sm font-serif italic text-slate-700">Novo acesso gerencial detectado no painel a partir do IP local.</p>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2 relative pl-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-px before:bg-slate-100">
+                    <div className="absolute left-1 top-2 w-2.5 h-2.5 rounded-full bg-slate-300 ring-4 ring-white" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Ontem</span>
+                    <p className="text-sm font-serif italic text-slate-700">Backup de segurança do banco de dados concluído.</p>
+                  </div>
+                </div>
+                <div className="p-4 border-t border-slate-100 bg-slate-50 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 cursor-pointer hover:text-accent transition-colors">Marcar todas como lidas</span>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </AdminAuthWrapper>
   );
