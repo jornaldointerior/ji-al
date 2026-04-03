@@ -1,25 +1,57 @@
+"use client";
+
+import { useState, useEffect, use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getNewsById, RELATED_CONTENT, MOCK_NEWS } from "@/lib/mock-data";
+import { supabase } from "@/lib/supabase";
 import Container from "@/components/ui/Container";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Headline from "@/components/ui/Headline";
-import { ChevronLeft, Share2, Printer, Bookmark } from "lucide-react";
+import { ChevronLeft, Share2, Printer, Bookmark, Loader2 } from "lucide-react";
 
 interface ArticleParams {
-  id: string;
+  slug: string;
 }
 
-export async function generateStaticParams(): Promise<ArticleParams[]> {
-  return MOCK_NEWS.map((news) => ({
-    id: news.id,
-  }));
-}
+export default function ArticlePage({ params }: { params: Promise<ArticleParams> }) {
+  const { slug } = use(params);
+  const [news, setNews] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-export default async function ArticlePage({ params }: { params: Promise<ArticleParams> }) {
-  const { id } = await params;
-  const news = getNewsById(id);
+  useEffect(() => {
+    async function fetchArticle() {
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          categories (name)
+        `)
+        .eq("slug", slug)
+        .single();
+
+      if (data && !error) {
+        setNews(data);
+        
+        // Increment view count (silently)
+        await supabase
+          .from("articles")
+          .update({ views_count: (data.views_count || 0) + 1 })
+          .eq("id", data.id);
+      }
+      setLoading(false);
+    }
+
+    fetchArticle();
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="animate-spin text-accent" size={48} />
+      </div>
+    );
+  }
 
   if (!news) {
     notFound();
@@ -50,7 +82,7 @@ export default async function ArticlePage({ params }: { params: Promise<ArticleP
           {/* Header Section */}
           <header className="flex flex-col gap-6">
             <div className="inline-block bg-primary text-white text-[10px] uppercase tracking-widest font-black px-3 py-1.5 font-sans w-fit shadow-lg">
-              {news.category}
+              {news.categories?.name || "Geral"}
             </div>
             
             <Headline as="h1" className="text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-primary">
@@ -64,14 +96,14 @@ export default async function ArticlePage({ params }: { params: Promise<ArticleP
             <div className="flex items-center gap-4 text-[11px] font-sans font-black uppercase text-slate-400 tracking-tighter">
               <span>Por Jornal do Interior</span>
               <span className="w-1.5 h-1.5 bg-accent rounded-full" />
-              <span>{news.date}</span>
+              <span>{new Date(news.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
             </div>
           </header>
 
           {/* Featured Image */}
           <div className="relative aspect-[16/9] w-full overflow-hidden shadow-2xl">
             <Image
-              src={news.image}
+              src={news.image_url || "/placeholder-news.jpg"}
               alt={news.title}
               fill
               className="object-cover"
@@ -81,21 +113,12 @@ export default async function ArticlePage({ params }: { params: Promise<ArticleP
 
           {/* Body Content */}
           <div className="prose prose-slate prose-lg max-w-none font-serif leading-relaxed text-slate-800 text-xl tracking-wide selection:bg-accent/30">
-            <div dangerouslySetInnerHTML={{ __html: RELATED_CONTENT }} />
-            
-            <div className="my-12 p-8 bg-slate-50 border-t-4 border-primary">
-              <Headline as="h4" className="text-2xl mb-4">Sobre o Sertão em 2026</Headline>
-              <p className="not-prose text-base leading-relaxed text-slate-600">
-                Esta é uma cobertura contínua do Jornal do Interior sobre as mudanças estruturais que definirão o futuro da nossa região nas próximas décadas.
-              </p>
-            </div>
-
-            <div dangerouslySetInnerHTML={{ __html: RELATED_CONTENT }} />
+            <div dangerouslySetInnerHTML={{ __html: news.content }} />
           </div>
           
           {/* Footer Tags */}
           <footer className="mt-12 pt-8 border-t border-slate-100 flex flex-wrap gap-2">
-            {["Educação", "Nordeste", "Desenvolvimento", news.category].map(tag => (
+            {["Educação", "Nordeste", "Desenvolvimento", news.categories?.name].filter(Boolean).map(tag => (
               <span key={tag} className="px-4 py-2 bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-widest hover:bg-primary hover:text-white transition-colors cursor-pointer">
                 #{tag}
               </span>

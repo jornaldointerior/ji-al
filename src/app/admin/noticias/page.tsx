@@ -188,9 +188,9 @@ export default function NoticiasAdminPage() {
                       
                       {/* Floating Actions */}
                       <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-all duration-300 md:translate-x-4 group-hover:translate-x-0">
-                        <button className="p-3 border border-slate-100 bg-white text-slate-800 hover:text-accent hover:border-slate-950 transition-all">
+                        <Link href={`/admin/noticias/editar?id=${item.id}`} className="p-3 border border-slate-100 bg-white text-slate-800 hover:text-accent hover:border-slate-950 transition-all">
                           <Edit2 size={16} />
-                        </button>
+                        </Link>
                         <button 
                           onClick={() => handleDelete(item.id)}
                           className="p-3 border border-slate-100 bg-white text-slate-600 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all"

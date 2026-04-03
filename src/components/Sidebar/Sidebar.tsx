@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Cloud, Sun, ArrowRight, Star, Wind, Droplets, MapPin, Send } from "lucide-react";
+import { Cloud, Sun, ArrowRight, MapPin, Send, Loader2 } from "lucide-react";
 import Headline from "../ui/Headline";
-import { MOCK_NEWS } from "@/lib/mock-data";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,9 +19,9 @@ export default function Sidebar() {
   const [currentCityIndex, setCurrentCityIndex] = useState(0);
   const [hasVoted, setHasVoted] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [mostRead, setMostRead] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const mostRead = MOCK_NEWS.slice(1, 8); // Skip Hero for 'Most Read'
-
   const pollOptions = [
     { id: 1, text: "Sim, é necessário mais fiscalização.", percent: 68 },
     { id: 2, text: "Não, prejudica os pequenos produtores.", percent: 24 },
@@ -29,6 +29,27 @@ export default function Sidebar() {
   ];
 
   useEffect(() => {
+    async function fetchSidebarData() {
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          id,
+          title,
+          published_at,
+          slug,
+          categories (name)
+        `)
+        .order("views_count", { ascending: false })
+        .limit(7);
+
+      if (data && !error) {
+        setMostRead(data);
+      }
+      setLoading(false);
+    }
+
+    fetchSidebarData();
+
     const timer = setInterval(() => {
       setCurrentCityIndex((prev) => (prev + 1) % WEATHER_LOCATIONS.length);
     }, 8000);
@@ -87,11 +108,9 @@ export default function Sidebar() {
         
         <div className="pt-5 border-t border-slate-100 flex justify-between text-[9px] text-slate-600 font-sans font-black uppercase tracking-[0.2em]">
           <div className="flex items-center gap-2">
-            <Droplets size={12} className="text-accent" />
             <span>Umidade {cityData.humidity}%</span>
           </div>
           <div className="flex items-center gap-2">
-            <Wind size={12} className="text-accent" />
             <span>Vento {cityData.wind}kmh</span>
           </div>
         </div>
@@ -178,25 +197,33 @@ export default function Sidebar() {
           <div className="h-0.5 bg-primary flex-1" />
         </div>
         
-        <div className="flex flex-col divide-y divide-slate-100">
-          {mostRead.map((news, index) => (
-            <Link key={news.id} href={news.href} className="group py-6 first:pt-0 last:pb-0 flex gap-6 items-start">
-              <span className="text-4xl font-serif font-black text-slate-200 group-hover:text-accent transition-colors leading-[0.7] pt-1">
-                {String(index + 1)}
-              </span>
-              <div className="flex flex-col gap-2 flex-1">
-                <span className="text-[8px] uppercase font-black text-accent font-sans tracking-[0.3em]">{news.category}</span>
-                <p className="text-sm font-serif font-black leading-snug text-primary group-hover:text-accent transition-colors line-clamp-2 uppercase- tracking-tight">
-                  {news.title}
-                </p>
-                <div className="flex items-center gap-2">
-                  <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                  <span className="text-[9px] text-slate-400 font-sans font-black uppercase tracking-widest">{news.date}</span>
+        {loading ? (
+          <div className="py-10 flex justify-center">
+            <Loader2 className="animate-spin text-accent" size={24} />
+          </div>
+        ) : (
+          <div className="flex flex-col divide-y divide-slate-100">
+            {mostRead.map((news, index) => (
+              <Link key={news.id} href={`/noticia/${news.slug}`} className="group py-6 first:pt-0 last:pb-0 flex gap-6 items-start">
+                <span className="text-4xl font-serif font-black text-slate-200 group-hover:text-accent transition-colors leading-[0.7] pt-1">
+                  {String(index + 1)}
+                </span>
+                <div className="flex flex-col gap-2 flex-1">
+                  <span className="text-[8px] uppercase font-black text-accent font-sans tracking-[0.3em]">{news.categories?.name}</span>
+                  <p className="text-sm font-serif font-black leading-snug text-primary group-hover:text-accent transition-colors line-clamp-2 uppercase- tracking-tight">
+                    {news.title}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                    <span className="text-[9px] text-slate-400 font-sans font-black uppercase tracking-widest">
+                      {new Date(news.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Static Ad Space */}
@@ -207,7 +234,7 @@ export default function Sidebar() {
         </span>
       </div>
 
-      {/* Acesso Exclusivo Widget - Moved here from Hero */}
+      {/* Acesso Exclusivo Widget */}
       <div className="bg-primary p-10 text-white shadow-2xl relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-[2px] bg-accent" />
         <div className="absolute -right-12 -top-12 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-accent/20 transition-all duration-1000" />
