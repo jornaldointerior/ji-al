@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
@@ -17,10 +17,13 @@ export default function LoginPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isMounted = useRef(true);
+
   useEffect(() => {
     // Reset state on initialization
     setLoading(false);
     setSuccess(false);
+    return () => { isMounted.current = false; };
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -29,22 +32,40 @@ export default function LoginPage() {
     setSuccess(false);
     setError(null);
 
+    // Timeout de segurança para soltar o botão se algo travar (ex: rede Hostinger lenta)
+    const loginTimeout = setTimeout(() => {
+      if (isMounted.current) {
+        setLoading(false);
+      }
+    }, 5000);
+
     try {
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        clearTimeout(loginTimeout);
+        throw authError;
+      }
 
       setSuccess(true);
-      // Usar replace para evitar que o usuário volte ao formulário de login via histórico
+      // O redirect para /admin/ deve disparar o AdminAuthWrapper
+      // que agora aguarda 1.2s para garantir a sincronia
       router.replace("/admin/");
     } catch (err: any) {
+      clearTimeout(loginTimeout);
       setLoading(false);
       setError(err.message || "Erro ao realizar login. Verifique suas credenciais.");
     }
   };
+
+  // Precisamos garantir que o componente não tente atualizar o estado se for desmontado
+  let mounted = true;
+  useEffect(() => {
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 sm:p-12 relative overflow-hidden">

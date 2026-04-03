@@ -10,49 +10,44 @@ export default function AdminAuthWrapper({ children }: { children: React.ReactNo
   const router = useRouter();
 
   useEffect(() => {
-    // Redirecionamento seguro usando o router do Next.js
-    const redirectToLogin = () => {
-      router.replace("/login/");
+    let mounted = true;
+
+    const checkSessionSequentially = async () => {
+      // 1. Aguarda um tempo fixo para o navegador processar os cookies/localStorage
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      
+      if (!mounted) return;
+
+      try {
+        // 2. Tenta obter a sessão de forma definitiva
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error || !session) {
+          // console.log("Acesso Negado: Redirecionando para login...");
+          router.replace("/login/");
+        } else {
+          // console.log("Acesso Autorizado para:", session.user.email);
+          setLoading(false);
+        }
+      } catch (err) {
+        // console.error("Erro crítico na verificação:", err);
+        router.replace("/login/");
+      }
     };
 
-    // Registrar o listener de autenticação primeiro
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // console.log("Auth Event:", event, !!session); // Debug em produção se necessário
+    checkSessionSequentially();
 
-      if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
-        if (session) {
-          setLoading(false);
-        } else {
-          // Se não houver sessão no INITIAL_SESSION, tentamos um check final por precaução
-          const { data: { session: currentSession } } = await supabase.auth.getSession();
-          if (!currentSession) {
-            redirectToLogin();
-          } else {
-            setLoading(false);
-          }
-        }
-      }
-
-      if (event === "SIGNED_OUT") {
+    // Listener apenas para SIGNED_OUT após a entrada
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT" && mounted) {
         setLoading(true);
-        redirectToLogin();
+        router.replace("/login/");
       }
     });
 
-    // Timeout de segurança: Se nada acontecer em 1.5s, forçamos um check final
-    // Útil para redes muito lentas onde o evento INITIAL_SESSION pode demorar
-    const safetyTimeout = setTimeout(async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        redirectToLogin();
-      } else {
-        setLoading(false);
-      }
-    }, 1500);
-
     return () => {
+      mounted = false;
       subscription.unsubscribe();
-      clearTimeout(safetyTimeout);
     };
   }, [router]);
 
