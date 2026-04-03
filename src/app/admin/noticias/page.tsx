@@ -25,6 +25,7 @@ export default function NoticiasAdminPage() {
       .from("articles")
       .select(`
         id,
+        slug,
         title,
         excerpt,
         image_url,
@@ -168,9 +169,14 @@ export default function NoticiasAdminPage() {
                   {/* Editorial Content */}
                   <div className="flex-1 flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
-                      <h4 className="font-serif font-black text-2xl md:text-3xl italic text-primary leading-tight group-hover:text-accent transition-colors decoration-accent/0 group-hover:decoration-accent/100 decoration-2 underline-offset-8 transition-all">
+                      <a
+                        href={`/noticia/${item.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-serif font-black text-2xl md:text-3xl italic text-primary leading-tight hover:text-accent transition-colors decoration-accent/0 hover:decoration-accent/100 decoration-2 underline-offset-8"
+                      >
                         {item.title}
-                      </h4>
+                      </a>
                       <p className="text-lg font-serif italic text-slate-600 line-clamp-2 max-w-2xl leading-relaxed">
                         {item.excerpt}
                       </p>
@@ -190,6 +196,15 @@ export default function NoticiasAdminPage() {
                       
                       {/* Floating Actions */}
                       <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-all duration-300 md:translate-x-4 group-hover:translate-x-0">
+                        <a
+                          href={`/noticia/${item.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Ver matéria publicada"
+                          className="p-3 border border-slate-100 bg-white text-slate-600 hover:text-accent hover:border-accent transition-all"
+                        >
+                          <ExternalLink size={16} />
+                        </a>
                         <button 
                           onClick={() => router.push(`/admin/noticias/editar?id=${item.id}`)} 
                           className="p-3 border border-slate-100 bg-white text-slate-800 hover:text-accent hover:border-slate-950 transition-all"

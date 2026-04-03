@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { FileText, TrendingUp, Users, ArrowUpRight, Plus, Newspaper } from "lucide-react";
+import { FileText, TrendingUp, Users, ArrowUpRight, Plus, Newspaper, Eye, ExternalLink, BarChart2 } from "lucide-react";
 import Headline from "@/components/ui/Headline";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -13,28 +13,23 @@ export default function AdminDashboard() {
     views: { value: "0", change: "Atualizado em tempo real" },
     readers: { value: "0", change: "Visitantes Únicos Estimados" },
   });
+  const [topArticles, setTopArticles] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchMetrics() {
-      // Fetch total articles
       const { count: articlesCount } = await supabase
         .from('articles')
         .select('*', { count: 'exact', head: true });
 
-      // Fetch sum of views_count
-      const { data: viewsData } = await supabase
-        .rpc('get_total_views'); // Wait, we don't have this RPC yet!
-
-      // Let's just fetch all specific columns if we don't have an RPC for sum, or we can use another RPC
-      // Wait, let's create a get_total_views RPC as well or sum them in JS if small.
-      // But it's much better to just select views_count and sum it here:
       const { data: allArticles } = await supabase
         .from('articles')
-        .select('views_count');
+        .select('slug, title, views_count')
+        .order('views_count', { ascending: false });
       
       const totalViews = allArticles?.reduce((acc, curr) => acc + (curr.views_count || 0), 0) || 0;
 
-      // Format format totalViews as K if over 1000
+      setTopArticles((allArticles || []).slice(0, 5));
+
       let formattedViews = totalViews.toString();
       if (totalViews >= 1000) {
         formattedViews = (totalViews / 1000).toFixed(1) + "K";
@@ -43,7 +38,7 @@ export default function AdminDashboard() {
       setMetrics({
         articles: { value: articlesCount || 0, change: "Registros ativos" },
         views: { value: formattedViews, change: "Total acumulado" },
-        readers: { value: Math.ceil(totalViews * 0.3).toString(), change: "Sessões Ativas Estimadas" }, // A mock 30% view-to-reader conversion
+        readers: { value: Math.ceil(totalViews * 0.3).toString(), change: "Sessões Ativas Estimadas" },
       });
     }
 
@@ -143,7 +138,74 @@ export default function AdminDashboard() {
         ))}
       </motion.div>
 
-      {/* Quick Action Monolith */}
+      {/* Top Acessos por Matéria */}
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.6 }}
+        className="flex flex-col gap-6"
+      >
+        <div className="flex items-center justify-between border-b-2 border-slate-900 pb-6">
+          <div className="flex items-center gap-4">
+            <BarChart2 size={22} className="text-accent" />
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent block">Ranking</span>
+              <h3 className="font-serif font-black text-3xl italic text-primary tracking-tighter leading-none">Top Acessos_</h3>
+            </div>
+          </div>
+          <Link
+            href="/admin/noticias"
+            className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-accent transition-colors flex items-center gap-2"
+          >
+            Ver todas <ArrowUpRight size={14} />
+          </Link>
+        </div>
+
+        <div className="flex flex-col divide-y divide-slate-100">
+          {topArticles.length === 0 ? (
+            <p className="text-slate-400 font-serif italic py-6">Nenhuma matéria com visualizações ainda.</p>
+          ) : (
+            topArticles.map((article, i) => {
+              const maxViews = topArticles[0]?.views_count || 1;
+              const pct = Math.round(((article.views_count || 0) / maxViews) * 100);
+              return (
+                <div key={article.slug} className="group flex items-center gap-6 py-5 hover:bg-slate-50 px-2 transition-colors">
+                  <span className="text-[28px] font-black text-slate-100 group-hover:text-slate-200 transition-colors leading-none w-10 shrink-0 text-center">
+                    {(i + 1).toString().padStart(2, '0')}
+                  </span>
+                  <div className="flex-1 flex flex-col gap-2 min-w-0">
+                    <span className="font-serif font-black italic text-base text-primary group-hover:text-accent transition-colors line-clamp-1 leading-tight">
+                      {article.title}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-accent transition-all duration-700"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-slate-500 shrink-0">
+                        <Eye size={12} className="text-accent" />
+                        {(article.views_count || 0).toLocaleString('pt-BR')}
+                      </div>
+                    </div>
+                  </div>
+                  <a
+                    href={`/noticia/${article.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Abrir matéria"
+                    className="p-2.5 border border-slate-100 text-slate-400 hover:text-accent hover:border-accent transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </motion.div>
+
       <motion.div 
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
