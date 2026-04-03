@@ -22,8 +22,8 @@ export default function AdminAuthWrapper({ children }: { children: React.ReactNo
       if (!session) {
         // Pequeno atraso para mitigar condições de corrida no roteamento/cookies
         setTimeout(async () => {
-          const { data: { secondCheck } } = await supabase.auth.getSession() as any;
-          if (!secondCheck) {
+          const { data: { session: secondSession } } = await supabase.auth.getSession();
+          if (!secondSession) {
             redirectToLogin();
           } else {
             setLoading(false);
