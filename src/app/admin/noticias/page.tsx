@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Headline from "@/components/ui/Headline";
-import { Edit2, Trash2, ExternalLink, Loader2, Eye, Calendar, Tag, Search, Filter, Plus } from "lucide-react";
+import { Edit2, Trash2, ExternalLink, Loader2, Eye, Calendar, Tag, Search, Filter, Plus, Newspaper } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import Image from "next/image";
