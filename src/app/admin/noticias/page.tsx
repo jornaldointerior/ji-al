@@ -75,10 +75,10 @@ export default function NoticiasAdminPage() {
         </div>
         
         <Link href="/admin/publicar" className="group">
-          <button className="bg-slate-950 text-white px-10 py-5 text-[11px] uppercase tracking-[0.3em] font-black hover:bg-accent transition-all duration-300 shadow-[6px_6px_0px_0px_rgba(249,115,22,1)] flex items-center gap-3">
+          <div className="bg-slate-950 text-white px-10 py-5 text-[11px] uppercase tracking-[0.3em] font-black hover:bg-accent transition-all duration-300 shadow-[6px_6px_0px_0px_rgba(249,115,22,1)] flex items-center gap-3">
             <Plus size={18} />
             Nova Publicação
-          </button>
+          </div>
         </Link>
       </div>
 

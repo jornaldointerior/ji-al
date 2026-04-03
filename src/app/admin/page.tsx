@@ -175,10 +175,10 @@ export default function AdminDashboard() {
 
           <Link href="/admin/publicar" className="group relative">
             <div className="absolute -inset-1 bg-accent opacity-30 blur group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
-            <button className="relative bg-white text-slate-950 px-12 py-6 text-xs font-black uppercase tracking-[0.4em] flex items-center gap-4 hover:bg-accent hover:text-white transition-all duration-300">
+            <div className="relative bg-white text-slate-950 px-12 py-6 text-xs font-black uppercase tracking-[0.4em] flex items-center gap-4 hover:bg-accent hover:text-white transition-all duration-300">
               <Plus size={18} />
               Criar Nova Matéria
-            </button>
+            </div>
           </Link>
         </div>
       </motion.div>
