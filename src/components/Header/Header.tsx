@@ -70,7 +70,7 @@ export default function Header() {
               <Link 
                 key={cat.name} 
                 href={cat.href}
-                className="text-[10px] uppercase font-sans font-black tracking-[0.2em] text-slate-700 hover:text-primary transition-colors relative group py-2"
+                className="text-[10px] uppercase font-sans font-black tracking-[0.2em] text-slate-700 hover:text-primary transition-colors relative z-50 group py-2"
               >
                 {cat.name}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />

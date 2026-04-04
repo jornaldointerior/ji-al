@@ -200,7 +200,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <a
-                    href={`/noticia/${article.slug}/`}
+                    href={`/noticia/${article.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Abrir matéria"
