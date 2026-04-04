@@ -98,19 +98,22 @@ export default function ArticlePage({ params }: { params: Promise<ArticleParams>
           </header>
 
           {/* Featured Image */}
-          <div className="relative aspect-[16/9] w-full overflow-hidden shadow-2xl">
+          <div className="relative aspect-[16/9] w-full overflow-hidden shadow-2xl bg-slate-50">
             <Image
               src={news.image_url || "/placeholder-news.jpg"}
               alt={news.title}
               fill
-              className="object-cover"
+              className="object-contain"
               priority
             />
           </div>
 
           {/* Body Content */}
           <div className="prose prose-slate prose-lg max-w-none font-serif leading-relaxed text-slate-800 text-xl tracking-wide selection:bg-accent/30">
-            <div dangerouslySetInnerHTML={{ __html: news.content }} />
+            <div 
+              className="whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: news.content }} 
+            />
           </div>
           
           {/* Footer Tags */}

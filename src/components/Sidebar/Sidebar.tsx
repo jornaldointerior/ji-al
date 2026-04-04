@@ -12,11 +12,16 @@ const WEATHER_CITIES = [
   { name: "Maceió", lat: -9.6498, lon: -35.7089 },
   { name: "Arapiraca", lat: -9.7516, lon: -36.6601 },
   { name: "Delmiro Gouveia", lat: -9.3894, lon: -37.9994 },
-  { name: "Piranhas", lat: -9.6239, lon: -37.7558 }
+  { name: "Piranhas", lat: -9.6239, lon: -37.7558 },
+  { name: "Palmeira dos Índios", lat: -9.4072, lon: -36.6311 },
+  { name: "Santana do Ipanema", lat: -9.3783, lon: -37.2436 },
+  { name: "Penedo", lat: -10.2897, lon: -36.5855 },
+  { name: "União dos Palmares", lat: -9.1601, lon: -36.0315 },
+  { name: "Marechal Deodoro", lat: -9.7107, lon: -35.8947 },
+  { name: "Coruripe", lat: -10.1256, lon: -36.1756 }
 ];
 
 export default function Sidebar() {
-  const [currentCityIndex, setCurrentCityIndex] = useState(0);
   const [weatherData, setWeatherData] = useState<any[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -53,24 +58,22 @@ export default function Sidebar() {
     async function fetchWeather() {
       try {
         const results = await Promise.all(WEATHER_CITIES.map(async (city) => {
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`);
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto`);
           const data = await res.json();
           
-          // Map weather codes to simple status or more descriptive ones
           const code = data.current.weather_code;
-          let status = "Céu Limpo";
-          if (code > 0 && code <= 3) status = "Parcialmente Nublado";
+          let status = "Limpo";
+          if (code > 0 && code <= 3) status = "Nublado";
           else if (code >= 45 && code <= 48) status = "Nevoeiro";
-          else if (code >= 51 && code <= 67) status = "Chuva Leve";
-          else if (code >= 71 && code <= 86) status = "Possibilidade de Chuva";
+          else if (code >= 51 && code <= 67) status = "Chuva";
+          else if (code >= 71 && code <= 86) status = "Chuva";
           else if (code >= 95) status = "Tempestade";
 
           return {
             city: city.name,
             temp: Math.round(data.current.temperature_2m),
             status: status,
-            humidity: data.current.relative_humidity_2m,
-            wind: Math.round(data.current.wind_speed_10m)
+            humidity: data.current.relative_humidity_2m
           };
         }));
         setWeatherData(results);
@@ -83,71 +86,45 @@ export default function Sidebar() {
 
     fetchSidebarData();
     fetchWeather();
-
-    const timer = setInterval(() => {
-      setCurrentCityIndex((prev) => (prev + 1) % WEATHER_CITIES.length);
-    }, 8000);
-    return () => clearInterval(timer);
   }, []);
-
-  const cityData = weatherData[currentCityIndex] || { city: "Maceió", temp: "--", status: "Carregando...", humidity: "--", wind: "--" };
 
   return (
     <aside className="w-full h-full flex flex-col gap-12">
       {/* Weather Widget */}
-      <div className="bg-white p-6 border border-slate-200 group relative">
-        <div className="flex justify-between items-start mb-6">
-          <Headline variant="secondary" className="text-[9px] uppercase tracking-[0.4em] font-black text-slate-600">
+      <div className="bg-white p-6 border border-slate-200 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-accent" />
+        <div className="flex justify-between items-center mb-6">
+          <Headline variant="secondary" className="text-[10px] uppercase tracking-[0.4em] font-black text-slate-600">
             Céu de Alagoas
           </Headline>
-          <div className="flex items-center gap-1.5 text-[9px] font-sans font-black text-accent uppercase tracking-widest">
-            <MapPin size={10} />
-            {cityData.city}
-          </div>
+          <Cloud size={16} className="text-accent" />
         </div>
         
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={cityData.city}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-baseline justify-between"
-          >
-            <div className="flex items-baseline gap-1">
-              <span className="text-6xl font-serif font-black text-primary leading-none tracking-tighter">
-                {cityData.temp}
-              </span>
-              <span className="text-xl font-serif font-bold text-slate-400">°C</span>
-            </div>
-            <motion.div 
-              animate={{ rotate: [0, 5, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="text-accent"
-            >
-              {typeof cityData.temp === 'number' && cityData.temp > 30 ? (
-                <Sun size={48} strokeWidth={1.5} />
-              ) : (
-                <Cloud size={48} strokeWidth={1.5} />
-              )}
-            </motion.div>
-          </motion.div>
-        </AnimatePresence>
-        
-        <div className="mt-2 mb-6">
-          <span className="text-[11px] text-primary font-serif font-bold italic lowercase tracking-wide">
-            {cityData.status}
-          </span>
-        </div>
-        
-        <div className="pt-5 border-t border-slate-100 flex justify-between text-[9px] text-slate-600 font-sans font-black uppercase tracking-[0.2em]">
-          <div className="flex items-center gap-2">
-            <span>Umidade {cityData.humidity}%</span>
+        {weatherLoading ? (
+          <div className="py-8 flex justify-center">
+            <Loader2 className="animate-spin text-accent" size={24} />
           </div>
-          <div className="flex items-center gap-2">
-            <span>Vento {cityData.wind}kmh</span>
+        ) : (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+            {weatherData.map((data) => (
+              <div key={data.city} className="flex flex-col border-b border-dashed border-slate-100 pb-2 last:border-0">
+                <div className="flex justify-between items-baseline mb-1">
+                  <span className="text-[10px] font-sans font-black text-primary uppercase tracking-tighter truncate max-w-[80px]">
+                    {data.city}
+                  </span>
+                  <div className="flex items-center gap-0.5">
+                    <span className="text-lg font-serif font-black text-primary">{data.temp}</span>
+                    <span className="text-[10px] font-serif font-bold text-slate-400">°C</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-[8px] uppercase font-black tracking-widest text-slate-400">
+                  <span>{data.status}</span>
+                  <span className="flex items-center gap-1"><MapPin size={8} className="text-accent" /> {data.humidity}%</span>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
 
       {/* Poll Widget */}
