@@ -37,8 +37,8 @@ export default function NewsCard({
         className={cn(
           "relative overflow-hidden z-0 bg-secondary border border-primary/5",
           variant === "horizontal" 
-            ? "basis-full md:basis-[45%] h-[280px] md:h-auto shrink-0" 
-            : "w-full aspect-[4/3] shrink-0"
+            ? "basis-full md:basis-[45%] h-[240px] md:h-[320px] shrink-0" 
+            : "w-full aspect-video shrink-0"
         )}
       >
         <Image
