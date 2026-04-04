@@ -29,17 +29,14 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
-      - name: 🛠️ Sanitize Build (Rename _next and Fix Paths)
+      - name: 🛠️ Sanitize Build (Deep Fix)
         run: |
-          # 1. Renomeia a pasta física
-          if [ -d "./out/_next" ]; then
-            mv ./out/_next ./out/static_next
-          fi
+          # 1. Renomeia a pasta de recursos do Next.js
+          mv ./out/_next ./out/static_next
           
-          # 2. Substitui as referências em TODOS os ficheiros (HTML, JS, CSS, JSON)
-          # Usamos 'LC_ALL=C' para evitar erros de codificação no Linux
-          find ./out -type f \( -name "*.html" -o -name "*.js" -o -name "*.css" -o -name "*.json" \) -exec sed -i 's/\/_next/\/static_next/g' {} +
-          find ./out -type f \( -name "*.html" -o -name "*.js" -o -name "*.css" -o -name "*.json" \) -exec sed -i 's/_next\//static_next\//g' {} +
+          # 2. Substitui TODAS as referências nos ficheiros HTML e JS
+          # Isso garante que o navegador saiba que agora deve procurar em static_next
+          grep -rl '_next' ./out | xargs sed -i 's/_next/static_next/g'
 
       - name: 📦 Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
@@ -53,10 +50,10 @@ jobs:
           lftp -e "
           set ftp:ssl-allow no;
           set ssl:verify-certificate no;
-          set ftp:use-mdtm yes;
           set net:max-retries 3;
           open $FTP_SERVER;
           user $FTP_USERNAME $FTP_PASSWORD;
-          mirror --reverse --delete --parallel=5 --no-perms ./out/ ./;
+          # O mirror --reverse envia a pasta 'out' para a raiz do FTP
+          mirror --reverse --delete --parallel=10 ./out/ ./;
           bye
           "
