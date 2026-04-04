@@ -8,19 +8,21 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
-const WEATHER_LOCATIONS = [
-  { city: "Sertânia", temp: 32, status: "Ensolarado", humidity: 34, wind: 12 },
-  { city: "Serra Talhada", temp: 35, status: "Céu Limpo", humidity: 28, wind: 15 },
-  { city: "Petrolina", temp: 34, status: "Poucas Nuvens", humidity: 30, wind: 10 },
-  { city: "Afogados da Ingazeira", temp: 31, status: "Parcialmente Nublado", humidity: 40, wind: 8 },
+const WEATHER_CITIES = [
+  { name: "Maceió", lat: -9.6498, lon: -35.7089 },
+  { name: "Arapiraca", lat: -9.7516, lon: -36.6601 },
+  { name: "Delmiro Gouveia", lat: -9.3894, lon: -37.9994 },
+  { name: "Piranhas", lat: -9.6239, lon: -37.7558 }
 ];
 
 export default function Sidebar() {
   const [currentCityIndex, setCurrentCityIndex] = useState(0);
+  const [weatherData, setWeatherData] = useState<any[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [mostRead, setMostRead] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [weatherLoading, setWeatherLoading] = useState(true);
   
   const pollOptions = [
     { id: 1, text: "Sim, é necessário mais fiscalização.", percent: 68 },
@@ -48,15 +50,47 @@ export default function Sidebar() {
       setLoading(false);
     }
 
+    async function fetchWeather() {
+      try {
+        const results = await Promise.all(WEATHER_CITIES.map(async (city) => {
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`);
+          const data = await res.json();
+          
+          // Map weather codes to simple status or more descriptive ones
+          const code = data.current.weather_code;
+          let status = "Céu Limpo";
+          if (code > 0 && code <= 3) status = "Parcialmente Nublado";
+          else if (code >= 45 && code <= 48) status = "Nevoeiro";
+          else if (code >= 51 && code <= 67) status = "Chuva Leve";
+          else if (code >= 71 && code <= 86) status = "Possibilidade de Chuva";
+          else if (code >= 95) status = "Tempestade";
+
+          return {
+            city: city.name,
+            temp: Math.round(data.current.temperature_2m),
+            status: status,
+            humidity: data.current.relative_humidity_2m,
+            wind: Math.round(data.current.wind_speed_10m)
+          };
+        }));
+        setWeatherData(results);
+      } catch (err) {
+        console.error("Weather error:", err);
+      } finally {
+        setWeatherLoading(false);
+      }
+    }
+
     fetchSidebarData();
+    fetchWeather();
 
     const timer = setInterval(() => {
-      setCurrentCityIndex((prev) => (prev + 1) % WEATHER_LOCATIONS.length);
+      setCurrentCityIndex((prev) => (prev + 1) % WEATHER_CITIES.length);
     }, 8000);
     return () => clearInterval(timer);
   }, []);
 
-  const cityData = WEATHER_LOCATIONS[currentCityIndex];
+  const cityData = weatherData[currentCityIndex] || { city: "Maceió", temp: "--", status: "Carregando...", humidity: "--", wind: "--" };
 
   return (
     <aside className="w-full h-full flex flex-col gap-12">
@@ -64,7 +98,7 @@ export default function Sidebar() {
       <div className="bg-white p-6 border border-slate-200 group relative">
         <div className="flex justify-between items-start mb-6">
           <Headline variant="secondary" className="text-[9px] uppercase tracking-[0.4em] font-black text-slate-600">
-            Céu do Sertão
+            Céu de Alagoas
           </Headline>
           <div className="flex items-center gap-1.5 text-[9px] font-sans font-black text-accent uppercase tracking-widest">
             <MapPin size={10} />
@@ -91,7 +125,7 @@ export default function Sidebar() {
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               className="text-accent"
             >
-              {cityData.temp > 32 ? (
+              {typeof cityData.temp === 'number' && cityData.temp > 30 ? (
                 <Sun size={48} strokeWidth={1.5} />
               ) : (
                 <Cloud size={48} strokeWidth={1.5} />

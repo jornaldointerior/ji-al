@@ -68,9 +68,9 @@ export default function Hero() {
 
           {/* Asymmetric Visual & News Grid */}
           <div className="grid lg:grid-cols-12 gap-12 items-start">
-            <div className="lg:col-span-8 relative h-[300px] md:h-[540px] w-full reveal-up stagger-3">
+            <div className="lg:col-span-8 relative aspect-video w-full reveal-up stagger-3">
               <div className="absolute -inset-4 bg-slate-50/50 -z-10 translate-x-4 translate-y-4 border border-primary/5 hidden md:block" />
-              <div className="h-full w-full overflow-hidden border border-primary/10">
+              <div className="h-full w-full overflow-hidden border border-primary/10 relative">
                 <Image
                   src={mainNews.image_url || "/placeholder-news.jpg"}
                   alt={mainNews.title}
@@ -87,6 +87,11 @@ export default function Hero() {
             <div className="lg:col-span-4 flex flex-col gap-10">
               <div className="bg-white p-6 md:p-8 border border-slate-200 shadow-sm reveal-up stagger-3">
                 <div className="flex flex-col gap-8">
+                  <div className="border-b border-slate-100 pb-4 mb-2">
+                    <Headline variant="accent" className="text-[10px] uppercase font-black tracking-[0.4em]">
+                      Últimas Notícias
+                    </Headline>
+                  </div>
                   {sideNews.map((news, i) => (
                     <Link 
                       key={news.id} 

@@ -54,7 +54,24 @@ export default function NewsFeed() {
             .filter(n => n.categories?.name?.toLowerCase() === cat.toLowerCase())
             .slice(0, 3);
           
-          if (catNews.length === 0) return null;
+          if (catNews.length === 0) {
+            return (
+              <div key={cat} className="flex flex-col gap-12 reveal-up opacity-50 grayscale">
+                <div className="flex items-end justify-between border-b-[6px] border-slate-200 pb-6">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400">Sessão</span>
+                    <Headline variant="secondary" as="h2" className="text-5xl md:text-7xl italic leading-none text-slate-300">
+                      {cat}
+                    </Headline>
+                  </div>
+                </div>
+                <div className="py-20 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 bg-slate-50">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Nenhum registro ainda</span>
+                  <p className="font-serif italic text-slate-500">Publicações desta categoria aparecerão aqui.</p>
+                </div>
+              </div>
+            );
+          }
 
           const isEven = idx % 2 === 0;
 

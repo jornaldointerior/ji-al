@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "O portal de notícias mais completo do interior, com política, economia, cultura e eventos em tempo real.",
 };
 
+import GlobalTracker from "@/components/analytics/GlobalTracker";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,7 +31,10 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${montserrat.variable} ${lora.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-serif">{children}</body>
+      <body className="min-h-full flex flex-col font-serif">
+        <GlobalTracker />
+        {children}
+      </body>
     </html>
   );
 }

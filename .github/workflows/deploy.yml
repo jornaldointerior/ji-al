@@ -46,8 +46,10 @@ jobs:
           lftp -e "
           set ftp:ssl-allow no;
           set ssl:verify-certificate no;
+          set ftp:use-mdtm yes;
+          set net:max-retries 3;
           open $FTP_SERVER;
           user $FTP_USERNAME $FTP_PASSWORD;
-          mirror --reverse --delete --verbose ./out/ ./public_html/;
+          mirror --reverse --delete --parallel=5 --no-perms ./out/ ./public_html/;
           bye
           "

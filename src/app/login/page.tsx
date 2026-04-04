@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
@@ -14,12 +14,30 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    // Reset state on initialization
+    setLoading(false);
+    setSuccess(false);
+    return () => { isMounted.current = false; };
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSuccess(false);
     setError(null);
+
+    // Timeout de segurança para soltar o botão se algo travar (ex: rede Hostinger lenta)
+    const loginTimeout = setTimeout(() => {
+      if (isMounted.current) {
+        setLoading(false);
+      }
+    }, 5000);
 
     try {
       const { error: authError } = await supabase.auth.signInWithPassword({
@@ -27,16 +45,27 @@ export default function LoginPage() {
         password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        clearTimeout(loginTimeout);
+        throw authError;
+      }
 
-      router.push("/admin");
-      router.refresh();
+      setSuccess(true);
+      // O redirect para /admin/ deve disparar o AdminAuthWrapper
+      // que agora aguarda 1.2s para garantir a sincronia
+      router.replace("/admin/");
     } catch (err: any) {
-      setError(err.message || "Erro ao realizar login. Verifique suas credenciais.");
-    } finally {
+      clearTimeout(loginTimeout);
       setLoading(false);
+      setError(err.message || "Erro ao realizar login. Verifique suas credenciais.");
     }
   };
+
+  // Precisamos garantir que o componente não tente atualizar o estado se for desmontado
+  let mounted = true;
+  useEffect(() => {
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 sm:p-12 relative overflow-hidden">
@@ -110,13 +139,30 @@ export default function LoginPage() {
               </motion.div>
             )}
 
+            {success && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-green-50 border-l-4 border-green-500 p-4 flex items-start gap-3 mt-2"
+              >
+                <div className="bg-green-500 rounded-full p-1">
+                  <LogIn size={12} className="text-white" />
+                </div>
+                <p className="text-[11px] font-sans font-bold text-green-700 leading-relaxed uppercase tracking-wider">
+                  Acesso Autorizado! Redirecionando...
+                </p>
+              </motion.div>
+            )}
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || success}
               className="mt-4 w-full bg-primary text-white py-5 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-accent transition-all duration-500 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group shadow-xl"
             >
               {loading ? (
                 <Loader2 size={16} className="animate-spin" />
+              ) : success ? (
+                "Entrando..."
               ) : (
                 <>
                   Entrar no Sistema

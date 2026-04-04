@@ -3,21 +3,22 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 import Container from "../ui/Container";
 
 export default function BreakingNews() {
-  const [headlines, setHeadlines] = useState<string[]>([]);
+  const [headlines, setHeadlines] = useState<{title: string, slug: string}[]>([]);
 
   useEffect(() => {
     async function fetchHeadlines() {
       const { data, error } = await supabase
         .from("articles")
-        .select("title")
+        .select("title, slug")
         .order("published_at", { ascending: false })
         .limit(10);
 
       if (data && !error) {
-        setHeadlines(data.map(h => h.title));
+        setHeadlines(data.map(h => ({ title: h.title, slug: h.slug })));
       }
     }
 
@@ -49,12 +50,16 @@ export default function BreakingNews() {
             className="flex gap-16 whitespace-nowrap items-center"
           >
             {[...headlines, ...headlines].map((news, i) => (
-              <div key={i} className="flex items-center gap-4 group cursor-pointer text-primary">
+              <Link 
+                key={i} 
+                href={`/noticia/${news.slug}`}
+                className="flex items-center gap-4 group cursor-pointer text-primary"
+              >
                 <span className="text-[11px] font-bold font-sans tracking-wide uppercase group-hover:text-accent transition-colors">
-                  {news}
+                  {news.title}
                 </span>
                 <span className="text-slate-200 font-serif italic text-lg">/</span>
-              </div>
+              </Link>
             ))}
           </motion.div>
         </div>
