@@ -50,10 +50,15 @@ jobs:
           lftp -e "
           set ftp:ssl-allow no;
           set ssl:verify-certificate no;
+          set ftp:passive-mode true;
+          set ftp:list-empty-ok yes;
+          set net:timeout 15;
           set net:max-retries 3;
+          set net:reconnect-interval-base 5;
           open $FTP_SERVER;
           user $FTP_USERNAME $FTP_PASSWORD;
           # O mirror --reverse envia a pasta 'out' para a raiz do FTP
-          mirror --reverse --delete --parallel=10 ./out/ ./;
+          # Reduzido --parallel para 2 para evitar bloqueios na Hostinger
+          mirror --reverse --delete --parallel=2 ./out/ ./;
           bye
           "
