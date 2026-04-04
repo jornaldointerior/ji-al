@@ -1,14 +1,22 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-  
-  # Redirect /index.html to / (except for actual file requests)
+
+  # 1. Provide index.html for directories (standard for Next.js static exports)
+  DirectoryIndex index.html
+
+  # 2. Redirect /index.html to / if hit directly (SEO cleanup)
+  RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.html\ HTTP/
   RewriteRule ^index\.html$ / [R=301,L]
-  
-  # If the requested resource is not a file and not a directory...
+
+  # 3. Handle trailing slashes (Next.js trailingSlash: true compatibility)
+  # If request doesn't have a slash and isn't a file, add a slash
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_URI} !(.*)/$
+  RewriteRule ^(.*)$ $1/ [L,R=301]
+
+  # 4. SPA Fallback: If not a file/directory, let index.html handle it
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  
-  # ...then rewrite it to index.html (Next.js SPA routing)
   RewriteRule . /index.html [L]
 </IfModule>

@@ -29,10 +29,17 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
-      - name: 🛠️ Sanitize Build (Rename _next to static_next)
+      - name: 🛠️ Sanitize Build (Rename _next and Fix Paths)
         run: |
-          mv ./out/_next ./out/static_next
-          find ./out -type f \( -name "*.html" -o -name "*.js" -o -name "*.json" -o -name "*.css" \) -exec sed -i 's/_next/static_next/g' {} +
+          # 1. Renomeia a pasta física
+          if [ -d "./out/_next" ]; then
+            mv ./out/_next ./out/static_next
+          fi
+          
+          # 2. Substitui as referências em TODOS os ficheiros (HTML, JS, CSS, JSON)
+          # Usamos 'LC_ALL=C' para evitar erros de codificação no Linux
+          find ./out -type f \( -name "*.html" -o -name "*.js" -o -name "*.css" -o -name "*.json" \) -exec sed -i 's/\/_next/\/static_next/g' {} +
+          find ./out -type f \( -name "*.html" -o -name "*.js" -o -name "*.css" -o -name "*.json" \) -exec sed -i 's/_next\//static_next\//g' {} +
 
       - name: 📦 Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
