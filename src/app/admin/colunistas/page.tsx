@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { 
   Plus, Trash2, Edit, Save, X, 
   Loader2, UserCircle, Image as ImageIcon,
-  CheckCircle2
+  CheckCircle2, UploadCloud
 } from "lucide-react";
 import Headline from "@/components/ui/Headline";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +31,8 @@ export default function ColumnistsAdmin() {
     bio: "",
     image_url: ""
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -55,12 +57,32 @@ export default function ColumnistsAdmin() {
     setSubmitting(true);
     
     try {
+      let finalImageUrl = formData.image_url;
+
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `columnists/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("articles")
+          .upload(filePath, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+          .from("articles")
+          .getPublicUrl(filePath);
+
+        finalImageUrl = publicUrlData.publicUrl;
+      }
+
       let error;
       if (isEditing) {
         const { error: updateError } = await supabase.from('columnists').update({
           name: formData.name,
           bio: formData.bio,
-          image_url: formData.image_url,
+          image_url: finalImageUrl,
           slug: createSlug(formData.name)
         }).eq('id', isEditing.id);
         error = updateError;
@@ -68,7 +90,7 @@ export default function ColumnistsAdmin() {
         const { error: insertError } = await supabase.from('columnists').insert([{
           name: formData.name,
           bio: formData.bio,
-          image_url: formData.image_url,
+          image_url: finalImageUrl,
           slug: createSlug(formData.name)
         }]);
         error = insertError;
@@ -84,7 +106,7 @@ export default function ColumnistsAdmin() {
       fetchColumnists();
     } catch (err) {
       console.error("Exception:", err);
-      alert("Ocorreu um erro inesperado. Verifique o console.");
+      alert("Ocorreu um erro inesperado ao salvar. Verifique o console.");
     } finally {
       setSubmitting(false);
     }
@@ -94,6 +116,8 @@ export default function ColumnistsAdmin() {
     setIsEditing(null);
     setIsCreating(false);
     setFormData({ name: "", bio: "", image_url: "" });
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const startEdit = (c: Columnist) => {
@@ -103,6 +127,7 @@ export default function ColumnistsAdmin() {
       bio: c.bio || "",
       image_url: c.image_url || ""
     });
+    setImagePreview(c.image_url || null);
     setIsCreating(true);
   };
 
@@ -168,14 +193,43 @@ export default function ColumnistsAdmin() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">URL da Foto</label>
-                    <div className="relative group">
-                      <ImageIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Foto do Colunista</label>
+                    <div className="relative aspect-square w-full max-w-[200px] border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center text-center p-4 hover:bg-slate-100 hover:border-accent transition-all cursor-pointer overflow-hidden group">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
+                        onChange={e => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            setImageFile(file);
+                            setImagePreview(URL.createObjectURL(file));
+                          }
+                        }} 
+                      />
+                      {imagePreview ? (
+                        <>
+                          <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
+                            <span className="text-[8px] font-black uppercase tracking-widest text-white border border-white px-3 py-1.5">Mudar Foto</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center gap-3">
+                          <UploadCloud size={32} className="text-slate-300 group-hover:text-accent transition-colors" />
+                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 leading-tight">Arraste ou clique<br/>para anexar</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-2">
                       <input 
                         value={formData.image_url}
-                        onChange={e => setFormData({...formData, image_url: e.target.value})}
-                        placeholder="https://exemplo.com/foto.jpg"
-                        className="w-full bg-slate-50 border-2 border-slate-100 p-5 pl-12 text-[10px] font-sans font-black uppercase tracking-widest outline-none focus:border-accent transition-all"
+                        onChange={e => {
+                          setFormData({...formData, image_url: e.target.value});
+                          if (!imageFile) setImagePreview(e.target.value);
+                        }}
+                        placeholder="Ou cole a URL da foto..."
+                        className="w-full bg-slate-50 border-2 border-slate-100 p-3 text-[8px] font-black uppercase tracking-widest outline-none focus:border-accent transition-all"
                       />
                     </div>
                   </div>
