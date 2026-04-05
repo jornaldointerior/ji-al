@@ -48,17 +48,18 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           lftp -e "
-          set ftp:ssl-allow no;
+          set ftp:ssl-allow yes;
           set ssl:verify-certificate no;
           set ftp:passive-mode true;
           set ftp:list-empty-ok yes;
-          set net:timeout 15;
-          set net:max-retries 3;
+          set ftp:use-feat no;
+          set net:timeout 30;
+          set net:max-retries 10;
           set net:reconnect-interval-base 5;
           open $FTP_SERVER;
           user $FTP_USERNAME $FTP_PASSWORD;
           # O mirror --reverse envia a pasta 'out' para a raiz do FTP
-          # Reduzido --parallel para 2 para evitar bloqueios na Hostinger
-          mirror --reverse --delete --parallel=2 ./out/ ./;
+          # Reduzido --parallel para 1 para evitar bloqueios na Hostinger
+          mirror --reverse --delete --parallel=1 ./out/ ./;
           bye
           "
