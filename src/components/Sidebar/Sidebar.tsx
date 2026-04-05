@@ -105,11 +105,11 @@ export default function Sidebar() {
             <Loader2 className="animate-spin text-accent" size={24} />
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
             {weatherData.map((data) => (
               <div key={data.city} className="flex flex-col border-b border-dashed border-slate-100 pb-2 last:border-0">
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="text-[10px] font-sans font-black text-primary uppercase tracking-tighter truncate max-w-[80px]">
+                  <span className="text-[10px] font-sans font-black text-primary uppercase tracking-tighter truncate max-w-[100px]">
                     {data.city}
                   </span>
                   <div className="flex items-center gap-0.5">
@@ -128,7 +128,7 @@ export default function Sidebar() {
       </div>
 
       {/* Poll Widget */}
-      <div className="bg-white p-8 border border-slate-200 relative">
+      <div className="bg-white p-6 md:p-8 border border-slate-200 relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-accent" />
         <div className="flex items-center gap-3 mb-6">
           <Headline variant="accent" className="text-[10px] leading-none">
@@ -137,7 +137,7 @@ export default function Sidebar() {
           <div className="h-px bg-slate-100 flex-1" />
         </div>
         
-        <p className="text-xl font-serif font-black text-primary mb-8 leading-[1.25] tracking-tight">
+        <p className="text-lg md:text-xl font-serif font-black text-primary mb-8 leading-[1.25] tracking-tight">
           Você concorda com as novas diretrizes de fiscalização agrícola no interior?
         </p>
         
@@ -158,7 +158,7 @@ export default function Sidebar() {
                       setSelectedOption(opt.id);
                       setHasVoted(true);
                     }}
-                    className="text-left w-full p-4 border border-slate-100 text-[10px] font-sans font-black uppercase tracking-widest text-slate-700 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center group/btn"
+                    className="text-left w-full p-4 border border-slate-100 text-[10px] font-sans font-black uppercase tracking-widest text-slate-700 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center min-h-[54px] group/btn"
                   >
                     {opt.text}
                     <ArrowRight size={14} className="opacity-0 group-hover/btn:opacity-100 -translate-x-2 group-hover/btn:translate-x-0 transition-all text-accent" />
@@ -216,7 +216,7 @@ export default function Sidebar() {
           <div className="flex flex-col divide-y divide-slate-100">
             {mostRead.map((news, index) => (
               <Link key={news.id} href={`/noticia/${news.slug}`} className="group py-6 first:pt-0 last:pb-0 flex gap-6 items-start">
-                <span className="text-4xl font-serif font-black text-slate-200 group-hover:text-accent transition-colors leading-[0.7] pt-1">
+                <span className="text-3xl md:text-4xl font-serif font-black text-slate-200 group-hover:text-accent transition-colors leading-[0.7] pt-1">
                   {String(index + 1)}
                 </span>
                 <div className="flex flex-col gap-2 flex-1">
@@ -238,7 +238,7 @@ export default function Sidebar() {
       </div>
 
       {/* Static Ad Space */}
-      <div className="bg-slate-50 h-80 border border-slate-200 flex flex-col items-center justify-center p-8 text-center group cursor-pointer hover:bg-slate-100 transition-colors">
+      <div className="bg-slate-50 h-64 md:h-80 border border-slate-200 flex flex-col items-center justify-center p-8 text-center group cursor-pointer hover:bg-slate-100 transition-colors">
         <div className="mb-4 px-3 py-1 bg-white border border-slate-200 text-[8px] uppercase tracking-[0.3em] font-black text-slate-300">Anúncio</div>
         <span className="text-[10px] uppercase tracking-[0.4em] font-black text-slate-300 group-hover:text-slate-500 transition-colors">
           Espaço Reservado
@@ -246,7 +246,7 @@ export default function Sidebar() {
       </div>
 
       {/* Acesso Exclusivo Widget */}
-      <div className="bg-primary p-10 text-white shadow-2xl relative overflow-hidden group">
+      <div className="bg-primary p-8 md:p-10 text-white shadow-2xl relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-[2px] bg-accent" />
         <div className="absolute -right-12 -top-12 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-accent/20 transition-all duration-1000" />
         
@@ -256,7 +256,7 @@ export default function Sidebar() {
             <div className="h-px bg-white/10 flex-1" />
           </div>
           
-          <p className="text-xl font-serif italic text-white/90 mb-8 leading-tight">
+          <p className="text-lg md:text-xl font-serif italic text-white/90 mb-8 leading-tight">
             Assine para receber furos e análises profundas.
           </p>
           
@@ -265,7 +265,7 @@ export default function Sidebar() {
               <input 
                 type="email" 
                 placeholder="SEU MELHOR E-MAIL" 
-                className="w-full bg-white/5 border border-white/10 px-5 py-4 text-[10px] uppercase tracking-widest focus:border-accent focus:bg-white/10 outline-none transition-all pr-12"
+                className="w-full bg-white/5 border border-white/10 px-5 py-4 text-base md:text-[10px] uppercase tracking-widest focus:border-accent focus:bg-white/10 outline-none transition-all pr-12"
               />
               <Send size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-accent transition-colors" />
             </div>

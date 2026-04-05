@@ -51,15 +51,15 @@ export default function Hero() {
   const sideNews = articles.slice(1);
 
   return (
-    <section className="relative pt-10 pb-16 overflow-hidden border-b border-primary/5">
+    <section className="relative pt-6 md:pt-10 pb-12 md:pb-16 overflow-hidden border-b border-primary/5">
       <Container>
-        <div className="flex flex-col gap-20">
+        <div className="flex flex-col gap-10 md:gap-20">
           {/* Typographic Header Section */}
           <div className="relative w-full reveal-up">
             <Link href={`/noticia/${mainNews.slug}`} className="group cursor-pointer w-full block">
               <Headline 
                 variant="massive" 
-                className="stagger-2 group-hover:text-accent transition-colors duration-500 text-[clamp(2.5rem,8vw,10rem)] leading-[0.95] w-full text-left tracking-tight break-words h-auto"
+                className="stagger-2 group-hover:text-accent transition-colors duration-500 text-[clamp(2.2rem,10vw,10rem)] leading-[0.95] w-full text-left tracking-tight break-words h-auto"
               >
                 {mainNews.title}
               </Headline>
@@ -67,10 +67,9 @@ export default function Hero() {
           </div>
 
           {/* Asymmetric Visual & News Grid */}
-          <div className="grid lg:grid-cols-12 gap-12 items-start">
-            <div className="lg:col-span-8 relative aspect-video w-full reveal-up stagger-3">
-              <div className="absolute -inset-4 bg-slate-50/50 -z-10 translate-x-4 translate-y-4 border border-primary/5 hidden md:block" />
-              <div className="h-full w-full overflow-hidden border border-primary/10 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+            <div className="lg:col-span-8 relative w-full reveal-up stagger-3">
+              <div className="relative aspect-[16/9] md:aspect-video w-full overflow-hidden border border-primary/10">
                 <Image
                   src={mainNews.image_url || "/placeholder-news.jpg"}
                   alt={mainNews.title}

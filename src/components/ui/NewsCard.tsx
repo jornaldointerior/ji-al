@@ -28,8 +28,8 @@ export default function NewsCard({
     <Link
       href={href}
       className={cn(
-        "group block transition-all duration-700 bg-transparent",
-        variant === "horizontal" ? "flex flex-col md:flex-row gap-8" : "flex flex-col gap-6",
+        "group block transition-all duration-700 bg-transparent active:scale-[0.99]",
+        variant === "horizontal" ? "flex flex-col md:flex-row gap-6 md:gap-8" : "flex flex-col gap-6",
         className
       )}
     >
