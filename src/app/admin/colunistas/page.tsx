@@ -55,26 +55,36 @@ export default function ColumnistsAdmin() {
     setSubmitting(true);
     
     try {
+      let error;
       if (isEditing) {
-        await supabase.from('columnists').update({
+        const { error: updateError } = await supabase.from('columnists').update({
           name: formData.name,
           bio: formData.bio,
           image_url: formData.image_url,
           slug: createSlug(formData.name)
         }).eq('id', isEditing.id);
+        error = updateError;
       } else {
-        await supabase.from('columnists').insert([{
+        const { error: insertError } = await supabase.from('columnists').insert([{
           name: formData.name,
           bio: formData.bio,
           image_url: formData.image_url,
           slug: createSlug(formData.name)
         }]);
+        error = insertError;
       }
       
+      if (error) {
+        console.error("Supabase Error:", error);
+        alert(`Erro ao salvar colunista: ${error.message}`);
+        return;
+      }
+
       resetForm();
       fetchColumnists();
     } catch (err) {
-      console.error(err);
+      console.error("Exception:", err);
+      alert("Ocorreu um erro inesperado. Verifique o console.");
     } finally {
       setSubmitting(false);
     }
@@ -98,8 +108,13 @@ export default function ColumnistsAdmin() {
 
   const deleteColumnist = async (id: string) => {
     if (!confirm("Excluir este colunista removerá todos os seus artigos vinculados. Continuar?")) return;
-    await supabase.from('columnists').delete().eq('id', id);
-    fetchColumnists();
+    const { error } = await supabase.from('columnists').delete().eq('id', id);
+    if (error) {
+      console.error("Delete Error:", error);
+      alert(`Erro ao excluir colunista: ${error.message}`);
+    } else {
+      fetchColumnists();
+    }
   };
 
   return (

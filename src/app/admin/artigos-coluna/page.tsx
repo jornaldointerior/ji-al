@@ -100,20 +100,30 @@ export default function ColumnArticlesAdmin() {
         finalImageUrl = publicUrlData.publicUrl;
       }
 
+      let error;
       if (editingId) {
-        await supabase.from('columnist_articles').update({
+        const { error: updateError } = await supabase.from('columnist_articles').update({
           title: formData.title,
           content: formData.content,
           columnist_id: formData.columnist_id,
           image_url: finalImageUrl
         }).eq('id', editingId);
+        error = updateError;
       } else {
-        await supabase.from('columnist_articles').insert([{
+        const { error: insertError } = await supabase.from('columnist_articles').insert([{
           ...formData,
           image_url: finalImageUrl,
           slug: createSlug(formData.title)
         }]);
+        error = insertError;
       }
+      
+      if (error) {
+        console.error("Supabase Error:", error);
+        alert(`Erro ao salvar artigo: ${error.message}`);
+        return;
+      }
+
       resetForm();
       fetchData();
     } catch (err) {
@@ -146,8 +156,13 @@ export default function ColumnArticlesAdmin() {
 
   const deleteArticle = async (id: string) => {
     if (!confirm("Excluir este artigo permanentemente?")) return;
-    await supabase.from('columnist_articles').delete().eq('id', id);
-    fetchData();
+    const { error } = await supabase.from('columnist_articles').delete().eq('id', id);
+    if (error) {
+      console.error("Delete Error:", error);
+      alert(`Erro ao excluir artigo: ${error.message}`);
+    } else {
+      fetchData();
+    }
   };
 
   return (
