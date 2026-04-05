@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, FileText, PenSquare, Home, LogOut,
   Activity, Bell, Search, X, ChevronRight, ChevronLeft,
-  GripVertical,
+  GripVertical, Users,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import AdminAuthWrapper from "@/components/admin/AdminAuthWrapper";
@@ -125,6 +125,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/admin/noticias", icon: FileText, label: "Gerenciar" },
     { href: "/admin/publicar", icon: PenSquare, label: "Publicar" },
+    { href: "/admin/artigos-coluna", icon: FileText, label: "Artigos" },
+    { href: "/admin/colunistas", icon: Users, label: "Colunistas" },
+    { href: "/admin/enquetes", icon: Activity, label: "Enquetes" },
     { href: "/admin/acessos", icon: Activity, label: "Acessos" },
   ];
 

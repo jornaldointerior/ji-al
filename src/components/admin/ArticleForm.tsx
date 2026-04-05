@@ -2,9 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Headline from "@/components/ui/Headline";
-import { UploadCloud, CheckCircle2, AlertCircle, Loader2, Save, Send, Image as ImageIcon, LayoutIcon, FileText } from "lucide-react";
+import { UploadCloud, CheckCircle2, AlertCircle, Loader2, Save, Send, Image as ImageIcon, LayoutIcon, FileText, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(() => import("./Editor"), { 
+  ssr: false,
+  loading: () => <div className="w-full h-[600px] bg-slate-50 border-2 border-slate-900 border-dashed flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-300">Carregando Ferramentas de Escrita...</div>
+});
 
 interface ArticleFormProps {
   initialData?: {
@@ -230,15 +237,12 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
               />
             </div>
 
-            <div className="flex flex-col gap-6 pt-8">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-900">Corpo da Matéria</span>
-              </div>
-              <textarea
-                required rows={20}
-                className="w-full text-xl leading-[1.8] text-slate-800 border-none outline-none font-serif placeholder:text-slate-300 resize-y min-h-[600px] py-4"
-                placeholder="Comece a registrar os fatos, entrevistas e análises aqui..."
-                value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            {/* ── Main Post Body ──────────────────────────────────── */}
+            <div className="flex flex-col gap-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-900 ml-2">Corpo da Matéria</span>
+              <Editor 
+                content={formData.content} 
+                onChange={(html) => setFormData({ ...formData, content: html })} 
               />
             </div>
           </div>
@@ -266,26 +270,95 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
                 )}
               </div>
             </div>
-
-            <div className="bg-white border-2 border-slate-900 p-8 flex flex-col gap-8 shadow-[8px_8px_0px_0px_rgba(15,23,42,0.05)]">
-              <div className="flex flex-col gap-3">
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Canal Editorial</label>
-                <select 
-                  className="w-full border-2 border-slate-100 p-4 bg-slate-50 uppercase text-[10px] tracking-[0.2em] font-black text-slate-700 outline-none focus:border-slate-900 transition-all appearance-none cursor-pointer"
-                  value={formData.categoryId} onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })} required
-                >
-                  {categories.length === 0 ? <option value="">Sincronizando...</option> : categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                </select>
-              </div>
+            {/* ── Editorial Panel ───────────────────────────────────── */}
+            <div className="bg-white border-2 border-slate-900 p-8 flex flex-col gap-8 shadow-[12px_12px_0px_0px_rgba(15,23,42,0.05)]">
               <div className="flex flex-col gap-4">
-                <label className="flex items-center gap-4 cursor-pointer group p-3 border border-slate-50 hover:bg-slate-50">
-                  <input type="checkbox" className="w-4 h-4 border-2 border-slate-200 checked:bg-accent appearance-none relative checked:after:content-['✓'] checked:after:absolute checked:after:-top-1 checked:after:left-0.5 checked:after:text-white checked:bg-slate-900 cursor-pointer" checked={formData.isHero} onChange={(e) => setFormData({ ...formData, isHero: e.target.checked })} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-700 group-hover:text-accent">Manchete Hero</span>
-                </label>
-                <label className="flex items-center gap-4 cursor-pointer group p-3 border border-slate-50 hover:bg-slate-50">
-                  <input type="checkbox" className="w-4 h-4 border-2 border-slate-200 checked:bg-accent appearance-none relative checked:after:content-['✓'] checked:after:absolute checked:after:-top-1 checked:after:left-0.5 checked:after:text-white checked:bg-slate-900 cursor-pointer" checked={formData.isFeatured} onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-700 group-hover:text-accent">Destaque Exclusivo</span>
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Canal Editorial</label>
+                  {categories.length > 0 && <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" title="Sincronizado" />}
+                </div>
+                
+                {categories.length === 0 ? (
+                  <div className="w-full h-14 bg-slate-50 border-2 border-slate-100 border-dashed flex items-center px-4 animate-pulse">
+                    <div className="h-2 w-24 bg-slate-200 rounded" />
+                  </div>
+                ) : (
+                  <div className="relative group">
+                    <select 
+                      className="w-full border-2 border-slate-100 p-5 bg-slate-50 uppercase text-[10px] tracking-[0.2em] font-black text-slate-900 outline-none focus:border-accent transition-all appearance-none cursor-pointer pr-12 relative z-10"
+                      value={formData.categoryId} 
+                      onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })} 
+                      required
+                    >
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-20 group-hover:text-accent transition-colors">
+                      <ChevronDown size={14} strokeWidth={3} />
+                    </div>
+                  </div>
+                )}
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                  Defina onde esta história será arquivada no portal.
+                </p>
+              </div>
+
+              {/* ── Feature Toggles ────────────────────────────────── */}
+              <div className="flex flex-col gap-4 pt-6 border-t border-slate-100">
+                <label className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Distribuição Especial</label>
+                
+                <div className="grid grid-cols-1 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, isHero: !formData.isHero })}
+                    className={cn(
+                      "flex items-center justify-between p-4 border-2 transition-all group",
+                      formData.isHero 
+                        ? "border-accent bg-accent/5 translate-x-1 shadow-[4px_4px_0px_0px_rgba(249,115,22,1)]" 
+                        : "border-slate-100 bg-slate-50 hover:border-slate-200"
+                    )}
+                  >
+                    <div className="flex flex-col items-start gap-1">
+                      <span className={cn(
+                        "text-[9px] font-black uppercase tracking-widest",
+                        formData.isHero ? "text-accent" : "text-slate-500"
+                      )}>Manchete Hero</span>
+                      <span className="text-[8px] text-slate-400 font-medium">Topo da página inicial</span>
+                    </div>
+                    <div className={cn(
+                      "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all",
+                      formData.isHero ? "border-accent bg-accent" : "border-slate-300"
+                    )}>
+                      {formData.isHero && <CheckCircle2 size={10} className="text-white" />}
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, isFeatured: !formData.isFeatured })}
+                    className={cn(
+                      "flex items-center justify-between p-4 border-2 transition-all group",
+                      formData.isFeatured 
+                        ? "border-primary bg-primary/5 translate-x-1 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]" 
+                        : "border-slate-100 bg-slate-50 hover:border-slate-200"
+                    )}
+                  >
+                    <div className="flex flex-col items-start gap-1">
+                      <span className={cn(
+                        "text-[9px] font-black uppercase tracking-widest",
+                        formData.isFeatured ? "text-primary" : "text-slate-500"
+                      )}>Destaque Exclusivo</span>
+                      <span className="text-[8px] text-slate-400 font-medium">Sessão de análise especial</span>
+                    </div>
+                    <div className={cn(
+                      "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all",
+                      formData.isFeatured ? "border-primary bg-primary" : "border-slate-300"
+                    )}>
+                      {formData.isFeatured && <CheckCircle2 size={10} className="text-white" />}
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
 

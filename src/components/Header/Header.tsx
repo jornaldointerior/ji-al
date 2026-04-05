@@ -3,29 +3,35 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Menu, X as CloseIcon, Facebook, Instagram, Twitter } from "lucide-react";
+import { Search, Menu, X as CloseIcon, Facebook, Instagram, Twitter, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Container from "../ui/Container";
 import Headline from "../ui/Headline";
+import { supabase } from "@/lib/supabase";
 
-const CATEGORIES = [
-  { name: "Alagoas", href: "/categoria/alagoas" },
-  { name: "Brasil", href: "/categoria/brasil" },
-  { name: "Mundo", href: "/categoria/mundo" },
-  { name: "Esportes", href: "/categoria/esportes" },
-  { name: "Cultura e Entretenimento", href: "/categoria/cultura-e-entretenimento" },
-];
+interface Category {
+  name: string;
+  slug: string;
+}
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
+
+    async function loadCategories() {
+      const { data } = await supabase.from('categories').select('name, slug').order('name');
+      if (data) setCategories(data);
+    }
+    loadCategories();
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -67,10 +73,10 @@ export default function Header() {
             "hidden lg:flex items-center gap-10 transition-all duration-300",
             isScrolled ? "opacity-100" : "opacity-90"
           )}>
-            {CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <Link 
-                key={cat.name} 
-                href={cat.href}
+                key={cat.slug} 
+                href={`/categoria/${cat.slug}`}
                 className="text-[10px] uppercase font-sans font-black tracking-[0.2em] text-slate-700 hover:text-primary transition-colors relative z-50 group py-2"
               >
                 {cat.name}
@@ -114,10 +120,10 @@ export default function Header() {
               <Headline variant="accent" className="text-[10px] uppercase font-black tracking-[0.5em] mb-4">
                 Categorias
               </Headline>
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <Link 
-                  key={cat.name} 
-                  href={cat.href}
+                  key={cat.slug} 
+                  href={`/categoria/${cat.slug}`}
                   className="text-3xl md:text-5xl font-sans font-black text-primary border-b border-slate-100 pb-6 flex justify-between items-center group transition-colors hover:text-accent"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

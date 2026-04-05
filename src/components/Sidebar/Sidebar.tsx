@@ -24,18 +24,34 @@ const WEATHER_CITIES = [
 export default function Sidebar() {
   const [weatherData, setWeatherData] = useState<any[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [mostRead, setMostRead] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [weatherLoading, setWeatherLoading] = useState(true);
   
-  const pollOptions = [
-    { id: 1, text: "Sim, é necessário mais fiscalização.", percent: 68 },
-    { id: 2, text: "Não, prejudica os pequenos produtores.", percent: 24 },
-    { id: 3, text: "Não tenho uma opinião formada.", percent: 8 }
-  ];
+  const [activePoll, setActivePoll] = useState<any>(null);
+  const [pollLoading, setPollLoading] = useState(true);
 
   useEffect(() => {
+    async function fetchActivePoll() {
+      setPollLoading(true);
+      const { data: poll, error } = await supabase
+        .from("polls")
+        .select("*, poll_options(*)")
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (poll && !error) {
+        setActivePoll(poll);
+        const votedId = localStorage.getItem(`voted_poll_${poll.id}`);
+        if (votedId) {
+          setHasVoted(true);
+          setSelectedOption(votedId);
+        }
+      }
+      setPollLoading(false);
+    }
+
     async function fetchSidebarData() {
       const { data, error } = await supabase
         .from("articles")
@@ -84,9 +100,33 @@ export default function Sidebar() {
       }
     }
 
+    fetchActivePoll();
     fetchSidebarData();
     fetchWeather();
   }, []);
+
+  const handleVote = async (optionId: string) => {
+    if (!activePoll) return;
+    
+    setSelectedOption(optionId);
+    setHasVoted(true);
+    localStorage.setItem(`voted_poll_${activePoll.id}`, optionId);
+
+    // Optimistic update
+    const updatedOptions = activePoll.poll_options.map((opt: any) => 
+      opt.id === optionId ? { ...opt, votes: (opt.votes || 0) + 1 } : opt
+    );
+    setActivePoll({ ...activePoll, poll_options: updatedOptions });
+
+    // Update DB
+    const option = activePoll.poll_options.find((opt: any) => opt.id === optionId);
+    if (option) {
+      await supabase
+        .from("poll_options")
+        .update({ votes: (option.votes || 0) + 1 })
+        .eq("id", optionId);
+    }
+  };
 
   return (
     <aside className="w-full h-full flex flex-col gap-12">
@@ -137,66 +177,77 @@ export default function Sidebar() {
           <div className="h-px bg-slate-100 flex-1" />
         </div>
         
-        <p className="text-lg md:text-xl font-serif font-black text-primary mb-8 leading-[1.25] tracking-tight">
-          Você concorda com as novas diretrizes de fiscalização agrícola no interior?
-        </p>
-        
-        <div className="flex flex-col gap-4">
-          <AnimatePresence mode="wait">
-            {!hasVoted ? (
-              <motion.div 
-                key="poll-options"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-3"
-              >
-                {pollOptions.map((opt) => (
-                  <button 
-                    key={opt.id}
-                    onClick={() => {
-                      setSelectedOption(opt.id);
-                      setHasVoted(true);
-                    }}
-                    className="text-left w-full p-4 border border-slate-100 text-[10px] font-sans font-black uppercase tracking-widest text-slate-700 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center min-h-[54px] group/btn"
+        {pollLoading ? (
+            <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-accent" size={20} /></div>
+        ) : activePoll ? (
+          <>
+            <p className="text-lg md:text-xl font-serif font-black text-primary mb-8 leading-[1.25] tracking-tight">
+              {activePoll.question}
+            </p>
+            
+            <div className="flex flex-col gap-4">
+              <AnimatePresence mode="wait">
+                {!hasVoted ? (
+                  <motion.div 
+                    key="poll-options"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-3"
                   >
-                    {opt.text}
-                    <ArrowRight size={14} className="opacity-0 group-hover/btn:opacity-100 -translate-x-2 group-hover/btn:translate-x-0 transition-all text-accent" />
-                  </button>
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="poll-results"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="space-y-6"
-              >
-                {pollOptions.map((opt) => (
-                  <div key={opt.id} className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-sans font-black uppercase tracking-widest text-primary">
-                      <span className={cn(selectedOption === opt.id && "text-accent")}>
+                    {activePoll.poll_options.sort((a: any, b: any) => a.order - b.order).map((opt: any) => (
+                      <button 
+                        key={opt.id}
+                        onClick={() => handleVote(opt.id)}
+                        className="text-left w-full p-4 border border-slate-100 text-[10px] font-sans font-black uppercase tracking-widest text-slate-700 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center min-h-[54px] group/btn"
+                      >
                         {opt.text}
-                      </span>
-                      <span>{opt.percent}%</span>
+                        <ArrowRight size={14} className="opacity-0 group-hover/btn:opacity-100 -translate-x-2 group-hover/btn:translate-x-0 transition-all text-accent" />
+                      </button>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    key="poll-results"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="space-y-6"
+                  >
+                    {(() => {
+                      const totalVotes = activePoll.poll_options.reduce((acc: number, curr: any) => acc + (curr.votes || 0), 0) || 1;
+                      return activePoll.poll_options.sort((a: any, b: any) => a.order - b.order).map((opt: any) => {
+                        const percent = Math.round(((opt.votes || 0) / totalVotes) * 100);
+                        return (
+                          <div key={opt.id} className="space-y-2">
+                            <div className="flex justify-between text-[10px] font-sans font-black uppercase tracking-widest text-primary">
+                              <span className={cn(selectedOption === opt.id && "text-accent")}>
+                                {opt.text}
+                              </span>
+                              <span>{percent}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-slate-50 rounded-none overflow-hidden">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${percent}%` }}
+                                transition={{ duration: 1.2, ease: "circOut" }}
+                                className={cn("h-full", selectedOption === opt.id ? "bg-accent" : "bg-primary")}
+                              />
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                    <div className="pt-4 text-[9px] text-slate-500 font-sans font-black uppercase tracking-[0.3em] text-center italic">
+                      Voto computado. Obrigado!
                     </div>
-                    <div className="h-1.5 w-full bg-slate-50 rounded-none overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${opt.percent}%` }}
-                        transition={{ duration: 1.2, ease: "circOut" }}
-                        className={cn("h-full", selectedOption === opt.id ? "bg-accent" : "bg-primary")}
-                      />
-                    </div>
-                  </div>
-                ))}
-                <div className="pt-4 text-[9px] text-slate-500 font-sans font-black uppercase tracking-[0.3em] text-center italic">
-                  Voto computado. Obrigado!
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </>
+        ) : (
+          <div className="py-10 text-center text-slate-300 font-serif italic text-sm">Nenhuma enquete ativa no momento.</div>
+        )}
       </div>
 
       {/* Most Read List */}

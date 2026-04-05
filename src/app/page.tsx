@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Header from "@/components/Header/Header";
 import BreakingNews from "@/components/Header/BreakingNews";
 import Hero from "@/components/Hero/Hero";
+import ColumnistSection from "@/components/Articles/ColumnistSection";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import NewsFeed from "@/components/NewsFeed/NewsFeed";
 import Footer from "@/components/Footer";
@@ -25,6 +26,8 @@ export default function Home() {
       <motion.main {...fadeIn}>
         <Hero />
         
+        <ColumnistSection />
+
         <Container className="grid lg:grid-cols-12 gap-12 py-12">
           {/* Main Content Area */}
           <div className="lg:col-span-8">
