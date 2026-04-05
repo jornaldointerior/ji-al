@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useEffect, use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -10,62 +7,49 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import Headline from "@/components/ui/Headline";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer";
-import { ChevronLeft, Share2, Printer, Bookmark, Loader2, ArrowRight, UserCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { ChevronLeft, Share2, Printer, Bookmark, ArrowRight, UserCircle } from "lucide-react";
 
 interface ArticleParams {
   slug: string;
 }
 
 export async function generateStaticParams() {
-  const { data: articles } = await supabase
-    .from("columnist_articles")
-    .select("slug");
+  try {
+    const { data: articles } = await supabase
+      .from("columnist_articles")
+      .select("slug");
 
-  return (articles || []).map((article) => ({
-    slug: article.slug,
-  }));
-}
+    const paths = (articles || []).map((article) => ({
+      slug: article.slug,
+    }));
 
-export default function ColumnArticlePage({ params }: { params: Promise<ArticleParams> }) {
-  const { slug } = use(params);
-  const [article, setArticle] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchArticle() {
-      const { data, error } = await supabase
-        .from("columnist_articles")
-        .select(`
-          *,
-          columnists (*)
-        `)
-        .eq("slug", slug)
-        .single();
-
-      if (data && !error) {
-        setArticle(data);
-        // Increment views
-        await supabase
-          .from("columnist_articles")
-          .update({ views_count: (data.views_count || 0) + 1 })
-          .eq("id", data.id);
-      }
-      setLoading(false);
+    // Ensure at least one path exists for static export to pass
+    if (paths.length === 0) {
+      return [{ slug: 'placeholder-slug' }];
     }
 
-    fetchArticle();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="animate-spin text-accent" size={48} />
-      </div>
-    );
+    return paths;
+  } catch (e) {
+    console.error("Error generating static params for artigo:", e);
+    return [{ slug: 'placeholder-slug' }];
   }
+}
 
-  if (!article) notFound();
+export default async function ColumnArticlePage({ params }: { params: Promise<ArticleParams> }) {
+  const { slug } = await params;
+
+  const { data: article, error } = await supabase
+    .from("columnist_articles")
+    .select(`
+      *,
+      columnists (*)
+    `)
+    .eq("slug", slug)
+    .single();
+
+  if (error || !article) {
+    notFound();
+  }
 
   return (
     <div className="bg-white min-h-screen flex flex-col">
@@ -100,7 +84,7 @@ export default function ColumnArticlePage({ params }: { params: Promise<ArticleP
                <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-slate-100 border-2 border-slate-900 overflow-hidden shrink-0">
                     {article.columnists?.image_url ? (
-                      <img src={article.columnists.image_url} alt={article.columnists.name} className="w-full h-full object-cover grayscale" />
+                      <img src={article.columnists.image_url} alt={article.columnists.name} className="w-full h-full object-contain grayscale" />
                     ) : (
                       <UserCircle size={40} className="text-slate-200" />
                     )}
@@ -119,7 +103,7 @@ export default function ColumnArticlePage({ params }: { params: Promise<ArticleP
             {/* Featured Image */}
             {article.image_url && (
               <div className="relative aspect-[16/9] w-full overflow-hidden border-2 border-slate-900 shadow-2xl">
-                <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
+                <img src={article.image_url} alt={article.title} className="w-full h-full object-contain" />
               </div>
             )}
 
@@ -127,7 +111,7 @@ export default function ColumnArticlePage({ params }: { params: Promise<ArticleP
             <div className="prose prose-slate prose-xl max-w-none font-serif leading-relaxed text-slate-800 tracking-wide">
                <span className="float-left text-9xl font-serif font-black text-slate-900 mr-4 mt-2 line-height-none border-b-8 border-accent leading-[0.7]">{article.content.charAt(0)}</span>
                <div 
-                 className="whitespace-pre-wrap pt-4"
+                 className="whitespace-pre-line pt-4"
                  dangerouslySetInnerHTML={{ __html: article.content.substring(1) }} 
                />
             </div>
@@ -136,7 +120,7 @@ export default function ColumnArticlePage({ params }: { params: Promise<ArticleP
             <footer className="mt-16 pt-16 border-t-2 border-slate-900 bg-slate-50 p-10 flex flex-col md:flex-row gap-10 items-center md:items-start group">
                <div className="w-32 h-32 bg-white border-2 border-slate-900 shrink-0 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-700">
                   {article.columnists?.image_url ? (
-                    <img src={article.columnists.image_url} alt={article.columnists.name} className="w-full h-full object-cover" />
+                    <img src={article.columnists.image_url} alt={article.columnists.name} className="w-full h-full object-contain" />
                   ) : (
                     <UserCircle size={100} className="text-slate-100" />
                   )}

@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -9,62 +6,52 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import Headline from "@/components/ui/Headline";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer";
-import { ChevronLeft, Loader2, ArrowRight, UserCircle, PenTool, Calendar, Eye } from "lucide-react";
-import { motion } from "framer-motion";
+import { ChevronLeft, ArrowRight, UserCircle, PenTool, Calendar, Eye } from "lucide-react";
 
 interface ColumnistParams {
   slug: string;
 }
 
 export async function generateStaticParams() {
-  const { data: columnists } = await supabase
-    .from("columnists")
-    .select("slug");
+  try {
+    const { data: columnists } = await supabase
+      .from("columnists")
+      .select("slug");
 
-  return (columnists || []).map((col) => ({
-    slug: col.slug,
-  }));
-}
+    const paths = (columnists || []).map((col) => ({
+      slug: col.slug,
+    }));
 
-export default function ColumnistArchivePage({ params }: { params: Promise<ColumnistParams> }) {
-  const { slug } = use(params);
-  const [columnist, setColumnist] = useState<any>(null);
-  const [articles, setArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchColumnistData() {
-      const { data: col } = await supabase
-        .from("columnists")
-        .select("*")
-        .eq("slug", slug)
-        .single();
-
-      if (col) {
-        setColumnist(col);
-        const { data: arts } = await supabase
-          .from("columnist_articles")
-          .select("*")
-          .eq("columnist_id", col.id)
-          .order("published_at", { ascending: false });
-        
-        if (arts) setArticles(arts);
-      }
-      setLoading(false);
+    if (paths.length === 0) {
+      return [{ slug: 'placeholder-colunista' }];
     }
 
-    fetchColumnistData();
-  }, [slug]);
+    return paths;
+  } catch (e) {
+    return [{ slug: 'placeholder-colunista' }];
+  }
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="animate-spin text-accent" size={48} />
-      </div>
-    );
+export default async function ColumnistArchivePage({ params }: { params: Promise<ColumnistParams> }) {
+  const { slug } = await params;
+
+  const { data: columnist, error: colError } = await supabase
+    .from("columnists")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (!columnist || colError) {
+    notFound();
   }
 
-  if (!columnist) notFound();
+  const { data: articles, error: artError } = await supabase
+    .from("columnist_articles")
+    .select("*")
+    .eq("columnist_id", columnist.id)
+    .order("published_at", { ascending: false });
+
+  const articlesList = articles || [];
 
   return (
     <div className="bg-white min-h-screen flex flex-col">
@@ -86,7 +73,7 @@ export default function ColumnistArchivePage({ params }: { params: Promise<Colum
                
                <div className="w-48 h-48 bg-white border-2 border-white shrink-0 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-700 shadow-2xl">
                   {columnist.image_url ? (
-                    <img src={columnist.image_url} alt={columnist.name} className="w-full h-full object-cover" />
+                    <img src={columnist.image_url} alt={columnist.name} className="w-full h-full object-contain" />
                   ) : (
                     <UserCircle size={192} className="text-slate-100" />
                   )}
@@ -105,7 +92,7 @@ export default function ColumnistArchivePage({ params }: { params: Promise<Colum
                   <div className="flex items-center justify-center md:justify-start gap-6 pt-4">
                      <div className="flex flex-col">
                         <span className="text-[9px] font-black uppercase tracking-widest text-accent mb-1">Total de Artigos</span>
-                        <span className="text-2xl font-serif font-black italic">{articles.length}</span>
+                        <span className="text-2xl font-serif font-black italic">{articlesList.length}</span>
                      </div>
                      <div className="w-px h-8 bg-white/10" />
                      <div className="flex flex-col">
@@ -125,13 +112,10 @@ export default function ColumnistArchivePage({ params }: { params: Promise<Colum
                </div>
 
                <div className="grid grid-cols-1 gap-12">
-                  {articles.map((art, i) => (
-                    <motion.div 
+                  {articlesList.map((art) => (
+                    <div 
                       key={art.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="group flex flex-col gap-6 border-b border-slate-100 pb-12 last:border-0"
+                      className="group flex flex-col gap-6 border-b border-slate-100 pb-12 last:border-0 transition-opacity duration-500"
                     >
                        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
                           <Calendar size={12} className="text-accent" />
@@ -152,10 +136,10 @@ export default function ColumnistArchivePage({ params }: { params: Promise<Colum
                              Continuar Lendo <ArrowRight size={14} className="group-hover/link:translate-x-2 transition-transform" />
                           </span>
                        </Link>
-                    </motion.div>
+                    </div>
                   ))}
 
-                  {articles.length === 0 && (
+                  {articlesList.length === 0 && (
                      <div className="py-20 text-center flex flex-col items-center gap-6 bg-slate-50 border-2 border-dashed border-slate-100">
                         <PenTool size={48} className="text-slate-200" />
                         <p className="text-lg font-serif italic text-slate-400">Aguardando as próximas reflexões do autor.</p>

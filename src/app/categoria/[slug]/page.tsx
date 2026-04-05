@@ -1,13 +1,9 @@
-"use client";
-
-import { useState, useEffect, use } from "react";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Container from "@/components/ui/Container";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import NewsCard from "@/components/ui/NewsCard";
 import Headline from "@/components/ui/Headline";
-import { Loader2 } from "lucide-react";
 
 interface CategoryParams {
   slug: string;
@@ -27,10 +23,8 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function CategoryPage({ params }: { params: Promise<CategoryParams> }) {
-  const { slug } = use(params);
-  const [articles, setArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default async function CategoryPage({ params }: { params: Promise<CategoryParams> }) {
+  const { slug } = await params;
   
   // Map slugs to display names
   const categoryMap: Record<string, string> = {
@@ -43,43 +37,18 @@ export default function CategoryPage({ params }: { params: Promise<CategoryParam
 
   const displayName = categoryMap[slug];
 
-  useEffect(() => {
-    async function fetchCategoryNews() {
-      if (!displayName) {
-        setLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("articles")
-        .select(`
-          *,
-          categories!inner (name)
-        `)
-        .eq("categories.name", displayName)
-        .order("published_at", { ascending: false });
-
-      if (data && !error) {
-        setArticles(data);
-      }
-      setLoading(false);
-    }
-
-    fetchCategoryNews();
-  }, [slug, displayName]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-4">
-        <Loader2 className="animate-spin text-accent" size={48} />
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Carregando Categoria...</span>
-      </div>
-    );
-  }
-
   if (!displayName) {
     notFound();
   }
+
+  const { data: articles, error } = await supabase
+    .from("articles")
+    .select(`
+      *,
+      categories!inner (name)
+    `)
+    .eq("categories.name", displayName)
+    .order("published_at", { ascending: false });
 
   return (
     <main className="py-10 bg-white min-h-screen">
@@ -96,7 +65,7 @@ export default function CategoryPage({ params }: { params: Promise<CategoryParam
           </header>
 
           <div className="grid md:grid-cols-2 gap-8 lg:gap-10">
-            {articles.map((news) => (
+            {(articles || []).map((news) => (
               <NewsCard
                 key={news.id}
                 title={news.title}
@@ -111,7 +80,7 @@ export default function CategoryPage({ params }: { params: Promise<CategoryParam
             ))}
           </div>
           
-          {articles.length === 0 && (
+          {(!articles || articles.length === 0) && (
             <div className="py-20 text-center border-2 border-dashed border-slate-100 italic text-slate-400">
               Nenhuma notícia encontrada nesta categoria no momento.
             </div>

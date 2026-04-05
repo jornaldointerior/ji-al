@@ -74,7 +74,7 @@ export default function Hero() {
                   src={mainNews.image_url || "/placeholder-news.jpg"}
                   alt={mainNews.title}
                   fill
-                  className="object-cover transition-transform duration-1000 hover:scale-105"
+                  className="object-contain transition-transform duration-1000 hover:scale-105"
                   priority
                 />
               </div>

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Facebook, Instagram, Twitter, Send } from "lucide-react";
 import Container from "./ui/Container";

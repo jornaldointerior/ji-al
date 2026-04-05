@@ -79,11 +79,11 @@ export default function ColumnistSection() {
               <div className="flex items-center gap-5">
                 <div className="w-20 h-20 bg-slate-100 border-2 border-slate-900 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-700">
                   {col.image_url ? (
-                    <img 
-                      src={col.image_url} 
-                      alt={col.name} 
-                      className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700" 
-                    />
+                      <img 
+                        src={col.image_url} 
+                        alt={col.name} 
+                        className="w-full h-full object-contain scale-110 group-hover:scale-100 transition-transform duration-700" 
+                      />
                   ) : (
                     <UserCircle size={80} className="text-slate-200 -m-1" />
                   )}

@@ -29,14 +29,19 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
-      - name: 🛠️ Sanitize Build (Deep Fix)
+      - name: 🛠️ Sanitize Build (Anti-Error)
         run: |
-          # 1. Renomeia a pasta de recursos do Next.js
-          mv ./out/_next ./out/static_next
+          # Verifica se a pasta existe antes de tentar renomear
+          if [ -d "./out/_next" ]; then
+            mv ./out/_next ./out/static_next
+            echo "Pasta _next renomeada com sucesso."
+          else
+            echo "Pasta _next não encontrada, ignorando renomeação."
+          fi
           
-          # 2. Substitui TODAS as referências nos ficheiros HTML e JS
-          # Isso garante que o navegador saiba que agora deve procurar em static_next
-          grep -rl '_next' ./out | xargs sed -i 's/_next/static_next/g'
+          # Substitui referências. O '|| true' garante que o script não pare se não houver o que substituir
+          grep -rl '_next' ./out | xargs sed -i 's/_next/static_next/g' || true
+          echo "Substituições de texto concluídas."
 
       - name: 📦 Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
@@ -48,18 +53,14 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           lftp -e "
-          set ftp:ssl-allow yes;
+          set ftp:ssl-allow no;
           set ssl:verify-certificate no;
           set ftp:passive-mode true;
-          set ftp:list-empty-ok yes;
-          set ftp:use-feat no;
           set net:timeout 30;
           set net:max-retries 10;
-          set net:reconnect-interval-base 5;
           open $FTP_SERVER;
           user $FTP_USERNAME $FTP_PASSWORD;
-          # O mirror --reverse envia a pasta 'out' para a raiz do FTP
-          # Reduzido --parallel para 1 para evitar bloqueios na Hostinger
-          mirror --reverse --delete --parallel=1 ./out/ ./;
+          # O comando --no-perms é essencial para a Hostinger
+          mirror --reverse --delete --parallel=1 --no-perms ./out/ ./;
           bye
           "

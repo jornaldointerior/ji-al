@@ -45,7 +45,7 @@ export default function NewsCard({
           src={image}
           alt={title}
           fill
-          className="object-cover transition-transform duration-1000 group-hover:scale-110 grayscale-[0.5] group-hover:grayscale-0"
+          className="object-contain transition-transform duration-1000 group-hover:scale-110 grayscale-[0.5] group-hover:grayscale-0"
         />
         <div className="absolute top-4 left-4 bg-white text-primary text-[8px] uppercase tracking-[0.4em] font-black px-3 py-1.5 z-10 border border-primary/10">
           {category}
