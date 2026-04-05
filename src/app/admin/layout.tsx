@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<{ id: string, slug: string, title: string, categories: { name: string } | { name: string }[] | null }[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   // Drag state refs (don't need re-render)
@@ -369,7 +369,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 group"
                       >
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[9px] font-black uppercase tracking-widest text-accent">{result.categories?.name || "Editorial"}</span>
+                          <span className="text-[9px] font-black uppercase tracking-widest text-accent">
+                            {(Array.isArray(result.categories) ? result.categories[0]?.name : result.categories?.name) || "Editorial"}
+                          </span>
                           <span className="font-serif italic font-bold text-slate-800 group-hover:text-primary transition-colors">{result.title}</span>
                         </div>
                         <ChevronRight size={16} className="text-slate-300 group-hover:text-accent transition-colors" />

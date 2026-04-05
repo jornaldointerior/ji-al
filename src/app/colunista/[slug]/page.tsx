@@ -16,6 +16,16 @@ interface ColumnistParams {
   slug: string;
 }
 
+export async function generateStaticParams() {
+  const { data: columnists } = await supabase
+    .from("columnists")
+    .select("slug");
+
+  return (columnists || []).map((col) => ({
+    slug: col.slug,
+  }));
+}
+
 export default function ColumnistArchivePage({ params }: { params: Promise<ColumnistParams> }) {
   const { slug } = use(params);
   const [columnist, setColumnist] = useState<any>(null);

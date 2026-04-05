@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import NextImage from "next/image";
 import Headline from "@/components/ui/Headline";
 import { UploadCloud, CheckCircle2, AlertCircle, Loader2, Save, Send, Image as ImageIcon, LayoutIcon, FileText, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,11 @@ const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
   loading: () => <div className="w-full h-[600px] bg-slate-50 border-2 border-slate-900 border-dashed flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-300">Carregando Ferramentas de Escrita...</div>
 });
+
+interface Category {
+  id: string;
+  name: string;
+}
 
 interface ArticleFormProps {
   initialData?: {
@@ -31,7 +37,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
@@ -145,9 +151,10 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(() => setSuccess(false), 5000);
 
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Ocorreu um erro ao processar.");
+    } catch (err) {
+      const error = err as Error;
+      console.error(error);
+      setError(error.message || "Ocorreu um erro ao processar.");
     } finally {
       setLoading(false);
     }
@@ -257,7 +264,12 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
                 <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onChange={handleImageChange} />
                 {imagePreview ? (
                   <>
-                    <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <NextImage 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      fill
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                    />
                     <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
                       <span className="text-[10px] font-black uppercase tracking-widest text-white border-2 border-white px-4 py-2">Alterar Imagem</span>
                     </div>

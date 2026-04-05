@@ -21,15 +21,44 @@ const WEATHER_CITIES = [
   { name: "Coruripe", lat: -10.1256, lon: -36.1756 }
 ];
 
+interface WeatherData {
+  city: string;
+  temp: number;
+  status: string;
+  humidity: number;
+}
+
+interface PollOption {
+  id: string;
+  text: string;
+  votes: number;
+  order: number;
+}
+
+interface Poll {
+  id: string;
+  question: string;
+  is_active: boolean;
+  poll_options: PollOption[];
+}
+
+interface SidebarArticle {
+  id: string;
+  title: string;
+  published_at: string;
+  slug: string;
+  categories: { name: string } | { name: string }[] | null;
+}
+
 export default function Sidebar() {
-  const [weatherData, setWeatherData] = useState<any[]>([]);
+  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [mostRead, setMostRead] = useState<any[]>([]);
+  const [mostRead, setMostRead] = useState<SidebarArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [weatherLoading, setWeatherLoading] = useState(true);
   
-  const [activePoll, setActivePoll] = useState<any>(null);
+  const [activePoll, setActivePoll] = useState<Poll | null>(null);
   const [pollLoading, setPollLoading] = useState(true);
 
   useEffect(() => {
@@ -113,13 +142,13 @@ export default function Sidebar() {
     localStorage.setItem(`voted_poll_${activePoll.id}`, optionId);
 
     // Optimistic update
-    const updatedOptions = activePoll.poll_options.map((opt: any) => 
+    const updatedOptions = activePoll.poll_options.map((opt: PollOption) => 
       opt.id === optionId ? { ...opt, votes: (opt.votes || 0) + 1 } : opt
     );
     setActivePoll({ ...activePoll, poll_options: updatedOptions });
 
     // Update DB
-    const option = activePoll.poll_options.find((opt: any) => opt.id === optionId);
+    const option = activePoll.poll_options.find((opt: PollOption) => opt.id === optionId);
     if (option) {
       await supabase
         .from("poll_options")
@@ -271,7 +300,9 @@ export default function Sidebar() {
                   {String(index + 1)}
                 </span>
                 <div className="flex flex-col gap-2 flex-1">
-                  <span className="text-[8px] uppercase font-black text-accent font-sans tracking-[0.3em]">{news.categories?.name}</span>
+                  <span className="text-[8px] uppercase font-black text-accent font-sans tracking-[0.3em]">
+                    {Array.isArray(news.categories) ? news.categories[0]?.name : news.categories?.name}
+                  </span>
                   <p className="text-sm font-serif font-black leading-snug text-primary group-hover:text-accent transition-colors line-clamp-2 uppercase- tracking-tight">
                     {news.title}
                   </p>

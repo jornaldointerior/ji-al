@@ -13,6 +13,20 @@ interface CategoryParams {
   slug: string;
 }
 
+export async function generateStaticParams() {
+  const categories = [
+    "alagoas",
+    "brasil",
+    "mundo",
+    "esportes",
+    "cultura-e-entretenimento"
+  ];
+
+  return categories.map((slug) => ({
+    slug,
+  }));
+}
+
 export default function CategoryPage({ params }: { params: Promise<CategoryParams> }) {
   const { slug } = use(params);
   const [articles, setArticles] = useState<any[]>([]);

@@ -17,6 +17,16 @@ interface ArticleParams {
   slug: string;
 }
 
+export async function generateStaticParams() {
+  const { data: articles } = await supabase
+    .from("columnist_articles")
+    .select("slug");
+
+  return (articles || []).map((article) => ({
+    slug: article.slug,
+  }));
+}
+
 export default function ColumnArticlePage({ params }: { params: Promise<ArticleParams> }) {
   const { slug } = use(params);
   const [article, setArticle] = useState<any>(null);

@@ -9,8 +9,7 @@ import {
   Bold, Italic, Underline as UnderlineIcon, 
   List, ListOrdered, Heading1, Heading2, Heading3,
   Link as LinkIcon, Quote, Undo, Redo,
-  Type, Eraser, AlignLeft, AlignCenter, AlignRight,
-  Code, Terminal
+  Eraser
 } from 'lucide-react';
 import { useCallback } from 'react';
 
@@ -48,7 +47,7 @@ const MenuButton = ({
   </button>
 );
 
-export default function Editor({ content, onChange, placeholder }: EditorProps) {
+export default function Editor({ content, onChange }: EditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
