@@ -5,40 +5,68 @@ import Header from "@/components/Header/Header";
 import BreakingNews from "@/components/Header/BreakingNews";
 import Hero from "@/components/Hero/Hero";
 import ColumnistSection from "@/components/Articles/ColumnistSection";
-import Sidebar from "@/components/Sidebar/Sidebar";
-import NewsFeed from "@/components/NewsFeed/NewsFeed";
+import MagazineSection from "@/components/NewsFeed/MagazineSection";
 import Footer from "@/components/Footer";
-import Container from "@/components/ui/Container";
 
 const fadeIn = {
-  initial: { opacity: 0.01, y: 20 },
+  initial: { opacity: 0.001, y: 30 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-100px" },
-  transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] as [number, number, number, number] }
+  transition: { duration: 1, ease: [0.33, 1, 0.68, 1] as [number, number, number, number] }
 };
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-white">
       <Header />
       <BreakingNews />
       
-      <motion.main {...fadeIn}>
+      <motion.main {...fadeIn} className="flex flex-col">
+        {/* 1 & 2. HERO COMPONENT (Manchete + Slideshow) */}
         <Hero />
         
+        {/* 3. NOSSOS COLUNISTAS */}
         <ColumnistSection />
 
-        <Container className="grid lg:grid-cols-12 gap-12 py-12">
-          {/* Main Content Area */}
-          <div className="lg:col-span-8">
-            <NewsFeed />
-          </div>
+        {/* 4. ALAGOAS */}
+        <MagazineSection 
+          sectionId="alagoas" 
+          title="Alagoas" 
+          accentColor="#2563eb" 
+          categoryName="Alagoas" 
+        />
 
-          {/* Sidebar Area */}
-          <div className="lg:col-span-4">
-            <Sidebar />
-          </div>
-        </Container>
+        {/* 5. BRASIL */}
+        <MagazineSection 
+          sectionId="brasil" 
+          title="Brasil" 
+          accentColor="#059669" 
+          categoryName="Brasil" 
+        />
+
+        {/* 6. MUNDO */}
+        <MagazineSection 
+          sectionId="mundo" 
+          title="Mundo" 
+          accentColor="#7c3aed" 
+          categoryName="Mundo" 
+        />
+
+        {/* 7. ESPORTES */}
+        <MagazineSection 
+          sectionId="esportes" 
+          title="Esportes" 
+          accentColor="#ca8a04" 
+          categoryName="Esportes" 
+        />
+
+        {/* 8. CULTURA E ENTRETENIMENTO */}
+        <MagazineSection 
+          sectionId="cultura" 
+          title="Cultura" 
+          accentColor="#db2777" 
+          categoryName="Cultura e Entretenimento" 
+        />
       </motion.main>
 
       <Footer />

@@ -46,6 +46,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
     categoryId: initialData?.category_id || "",
     isFeatured: initialData?.is_featured || false,
     isHero: initialData?.is_hero || false,
+    homeSection: (initialData as any)?.home_section || "default",
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -132,6 +133,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
           image_url: imageUrl,
           is_hero: formData.isHero,
           is_featured: formData.isFeatured,
+          home_section: formData.homeSection,
           published_at: new Date().toISOString(),
         });
 
@@ -141,6 +143,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
           title: "", excerpt: "", content: "",
           categoryId: categories.length > 0 ? categories[0].id : "",
           isFeatured: false, isHero: false,
+          homeSection: "default",
         });
         setImageFile(null);
         setImagePreview(null);
@@ -154,6 +157,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
           image_url: imageUrl,
           is_hero: formData.isHero,
           is_featured: formData.isFeatured,
+          home_section: formData.homeSection,
         }).eq("id", initialData.id);
 
         if (updateError) throw new Error(`Erro ao atualizar no banco: ${updateError.message}`);
@@ -325,6 +329,37 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
                 )}
                 <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
                   Defina onde esta história será arquivada no portal.
+                </p>
+              </div>
+
+              {/* ── Home Section Selection ───────────────────────────── */}
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <LayoutIcon size={18} className="text-accent" />
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900">Destino na Home</h3>
+                </div>
+                
+                <div className="relative group">
+                  <select 
+                    className="w-full border-2 border-slate-100 p-5 bg-slate-50 uppercase text-[10px] tracking-[0.2em] font-black text-slate-900 outline-none focus:border-accent transition-all appearance-none cursor-pointer pr-12 relative z-10"
+                    value={formData.homeSection} 
+                    onChange={(e) => setFormData({ ...formData, homeSection: e.target.value })} 
+                  >
+                    <option value="default">Padrão (Sem Destaque Fixo)</option>
+                    <option value="headline">1. Manchete Principal (Só Texto)</option>
+                    <option value="slideshow">2. Últimas Notícias (Slide/Lateral)</option>
+                    <option value="alagoas">4. Sessão Alagoas</option>
+                    <option value="brasil">5. Sessão Brasil</option>
+                    <option value="mundo">6. Sessão Mundo</option>
+                    <option value="esportes">7. Sessão Esportes</option>
+                    <option value="cultura">8. Sessão Cultura e Entretenimento</option>
+                  </select>
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-20 group-hover:text-accent transition-colors">
+                    <ChevronDown size={14} strokeWidth={3} />
+                  </div>
+                </div>
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                  Escolha em qual das 8 sessões exclusivas esta matéria será exibida na página inicial.
                 </p>
               </div>
 
