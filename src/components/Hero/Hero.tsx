@@ -102,12 +102,12 @@ export default function Hero() {
           
           {/* SECTION 1: MANCHETE PRINCIPAL (SÓ TEXTO) */}
           {headline && (
-            <div className="relative w-full border-b-2 border-slate-900 pb-12">
-               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-accent mb-6 block">Sessão 01 / Manchete Principal</span>
+            <div className="relative w-full border-b-[3px] border-slate-950 pb-10 md:pb-16">
+               <span className="text-[12px] font-black uppercase tracking-[0.6em] text-accent mb-8 block">Sessão 01 / Manchete de Capa</span>
                <Link href={`/noticia/${headline.slug}`} className="group cursor-pointer w-full block">
                 <Headline 
                   variant="massive" 
-                  className="group-hover:text-accent transition-colors duration-500 text-[clamp(2.5rem,11vw,12rem)] font-black leading-[0.88] w-full text-left tracking-tighter"
+                  className="group-hover:opacity-75 transition-all duration-500 italic"
                 >
                   {headline.title}
                 </Headline>
@@ -116,23 +116,23 @@ export default function Hero() {
           )}
 
           {/* SECTION 2: ÚLTIMAS NOTÍCIAS (SLIDE + LISTA) */}
-          <div className="flex flex-col gap-10">
-            <div className="flex items-center gap-4 border-b border-slate-100 pb-5">
-               <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-               <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-800">Sessão 02 / Últimas Notícias</h3>
+          <div className="flex flex-col gap-12">
+            <div className="flex items-center gap-5 border-b-2 border-slate-100 pb-6">
+               <div className="w-3 h-3 bg-accent" />
+               <h3 className="text-[12px] font-black uppercase tracking-[0.5em] text-slate-950">Sessão 02 / Panorama Regional</h3>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
               {/* SLIDESHOW AREA */}
-              <div className="lg:col-span-8 relative w-full overflow-hidden bg-slate-50 group aspect-[4/3] md:aspect-[3/2] lg:aspect-[16/10] rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100">
+              <div className="lg:col-span-8 relative w-full overflow-hidden bg-slate-50 group aspect-[4/3] md:aspect-[3/2] lg:aspect-[16/10] border-[3px] border-slate-950 shadow-[16px_16px_0px_0px_rgba(0,0,0,0.08)]">
                 <AnimatePresence mode="wait">
                   {slides[currentSlide] && (
                     <motion.div
                       key={slides[currentSlide].id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.6 }}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.5, ease: "circOut" }}
                       className="relative w-full h-full cursor-pointer"
                     >
                       <Link href={`/noticia/${slides[currentSlide].slug}`} className="w-full h-full flex flex-col group">
@@ -141,15 +141,15 @@ export default function Hero() {
                             src={slides[currentSlide].image_url || "/placeholder-news.jpg"}
                             alt={slides[currentSlide].title}
                             fill
-                            className="object-cover transition-transform duration-[4000ms] group-hover:scale-105"
+                            className="object-cover transition-transform duration-[6000ms] group-hover:scale-110"
                           />
                         </div>
                         {/* FOOTER CAPTION (SMALL TEXT) */}
-                        <div className="bg-white p-6 md:p-8 flex flex-col gap-2">
-                          <span className="text-[9px] text-accent font-black uppercase tracking-[0.2em] block">
+                        <div className="bg-slate-950 p-8 md:p-10 flex flex-col gap-3">
+                          <span className="text-[10px] text-white/60 font-black uppercase tracking-[0.3em] block">
                              {slides[currentSlide].categories?.name}
                           </span>
-                          <h4 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight leading-tight line-clamp-1">
+                          <h4 className="text-2xl md:text-4xl font-black italic text-white tracking-tighter leading-[0.9] line-clamp-1">
                             {slides[currentSlide].title}
                           </h4>
                         </div>
@@ -158,41 +158,41 @@ export default function Hero() {
                   )}
                 </AnimatePresence>
                 
-                {/* Controls - Modern UI */}
-                <div className="absolute bottom-24 right-8 flex gap-3 z-20">
+                {/* Controls - Neo-Brutalist */}
+                <div className="absolute bottom-32 right-10 flex gap-4 z-20">
                   <button 
-                    onClick={() => setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length)} 
-                    className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-lg border border-slate-100"
+                    onClick={(e) => { e.preventDefault(); setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length); }} 
+                    className="w-14 h-14 bg-white border-[3px] border-slate-950 flex items-center justify-center hover:bg-slate-950 hover:text-white transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                   >
-                    <ChevronLeft size={18} strokeWidth={2.5} />
+                    <ChevronLeft size={24} strokeWidth={3} />
                   </button>
                   <button 
-                    onClick={() => setCurrentSlide(prev => (prev + 1) % slides.length)} 
-                    className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-lg border border-slate-100"
+                    onClick={(e) => { e.preventDefault(); setCurrentSlide(prev => (prev + 1) % slides.length); }} 
+                    className="w-14 h-14 bg-white border-[3px] border-slate-950 flex items-center justify-center hover:bg-slate-950 hover:text-white transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                   >
-                    <ChevronRight size={18} strokeWidth={2.5} />
+                    <ChevronRight size={24} strokeWidth={3} />
                   </button>
                 </div>
               </div>
 
               {/* LIST SIDEBAR WITHIN SECTION 2 */}
-              <div className="lg:col-span-4 flex flex-col gap-8 py-2">
-                <div className="flex flex-col gap-6">
+              <div className="lg:col-span-4 flex flex-col gap-10 py-2">
+                <div className="flex flex-col gap-4">
                   {slides.map((news, i) => (
                     <Link 
                       key={news.id} 
                       href={`/noticia/${news.slug}`}
-                      className={`flex items-start gap-6 group border-b border-slate-50 pb-6 last:border-0 last:pb-0 transition-all duration-300 ${currentSlide === i ? 'pl-4 border-l-2 border-l-accent bg-slate-50/50 py-4 -ml-4 rounded-r-xl' : ''}`}
+                      className={`flex items-start gap-8 group border-b border-slate-100 pb-8 last:border-0 last:pb-0 transition-all duration-500 ${currentSlide === i ? 'pl-6 border-l-[3px] border-l-slate-950 bg-slate-50 py-6 -ml-6' : ''}`}
                       onMouseEnter={() => setCurrentSlide(i)}
                     >
-                      <span className={`text-2xl font-black italic tracking-tighter ${currentSlide === i ? 'text-accent' : 'text-slate-200'} transition-colors`}>
-                        0{i + 1}
+                      <span className={`text-3xl font-black italic tracking-tighter ${currentSlide === i ? 'text-slate-950' : 'text-slate-200'} transition-colors`}>
+                        {i + 1}
                       </span>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[9px] uppercase font-bold tracking-[0.2em] text-slate-400 group-hover:text-accent mb-1 transition-colors">
+                      <div className="flex flex-col gap-2">
+                        <span className="text-[10px] uppercase font-black tracking-[0.3em] text-slate-400 group-hover:text-accent mb-1 transition-colors">
                           {news.categories?.name}
                         </span>
-                        <h4 className="text-lg font-bold leading-snug text-slate-800 group-hover:text-accent transition-colors duration-300">
+                        <h4 className="text-xl font-black italic leading-[0.95] text-slate-800 group-hover:text-accent transition-all duration-300 line-clamp-2">
                           {news.title}
                         </h4>
                       </div>

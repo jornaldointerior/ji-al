@@ -61,74 +61,74 @@ export default function MagazineSection({ sectionId, title, accentColor = "#ff4d
       <Container>
         <div className="flex flex-col gap-10">
           {/* Header */}
-          <div className="flex items-end justify-between border-b-4 border-slate-900 pb-6">
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Editoria JI</span>
-              <Headline variant="primary" className="text-5xl md:text-7xl tracking-tighter mb-0">
-                {title}<span style={{ color: accentColor }}>_</span>
+          <div className="flex items-end justify-between border-b-4 border-slate-950 pb-8">
+            <div className="flex flex-col gap-3">
+              <span className="text-[11px] font-black uppercase tracking-[0.5em] text-slate-400">Editoria JI</span>
+              <Headline variant="massive" className="text-6xl md:text-8xl tracking-tighter mb-0 italic">
+                {title}<span style={{ color: accentColor }}>.</span>
               </Headline>
             </div>
             <Link 
               href={`/categoria/${categoryName.toLowerCase().replace(/ /g, "-")}`}
-              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:text-accent transition-colors group mb-2"
+              className="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest hover:opacity-70 transition-all group mb-3"
             >
-              Arquivo Completo <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              Consultar Arquivo <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
           {/* Grid Layout (Matching Alagoas Example) */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
             {/* Main Story (Left/Large) */}
-            <div className="md:col-span-7 flex flex-col gap-6 group">
-              <div className="relative aspect-[4/3] w-full overflow-hidden border-2 border-slate-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)]">
+            <div className="md:col-span-7 flex flex-col gap-8 group">
+              <div className="relative aspect-[4/3] md:aspect-[16/10] w-full overflow-hidden border-[3px] border-slate-950 shadow-[12px_12px_0px_0px_rgba(0,0,0,0.08)]">
                 <Image
                   src={main.image_url || "/placeholder-news.jpg"}
                   alt={main.title}
                   fill
-                  className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                  className="object-cover transition-transform duration-[2000ms] group-hover:scale-105"
                 />
-                <div className="absolute top-6 left-6 bg-white border-2 border-slate-900 px-4 py-2">
-                   <span className="text-[9px] font-black uppercase tracking-widest text-slate-900">{categoryName}</span>
+                <div className="absolute top-0 left-0 bg-slate-950 px-5 py-3">
+                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">{categoryName}</span>
                 </div>
               </div>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-5 pr-4">
                 <Link href={`/noticia/${main.slug}`}>
-                  <h3 className="text-2xl md:text-3xl font-black italic tracking-tighter leading-tight group-hover:text-accent transition-colors line-clamp-2">
+                  <h3 className="text-3xl md:text-5xl font-black italic tracking-tighter leading-[0.9] group-hover:opacity-70 transition-all line-clamp-3">
                     {main.title}
                   </h3>
                 </Link>
-                <p className="text-sm md:text-base text-slate-600 font-serif leading-relaxed max-w-xl line-clamp-2">
+                <p className="text-base md:text-lg text-slate-600 font-serif leading-relaxed max-w-2xl line-clamp-3">
                   {main.excerpt}
                 </p>
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                  {new Date(main.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}.
-                </span>
+                <div className="flex items-center gap-4">
+                  <div className="h-[2px] w-8 bg-slate-200" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">
+                    {new Date(main.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Side Stories (Right/Stack) */}
-            <div className="md:col-span-5 flex flex-col gap-10">
+            <div className="md:col-span-5 flex flex-col gap-12 md:gap-14 pt-4">
               {others.map((item) => (
-                <div key={item.id} className="grid grid-cols-1 sm:grid-cols-5 gap-6 group border-b border-slate-50 pb-10 last:border-0 last:pb-0">
-                  <div className="sm:col-span-2 relative aspect-video sm:aspect-square border border-slate-200">
+                <div key={item.id} className="grid grid-cols-1 sm:grid-cols-12 gap-8 group border-b border-slate-100 pb-12 last:border-0 last:pb-0">
+                  <div className="sm:col-span-5 relative aspect-video sm:aspect-square border-[2px] border-slate-950 overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,0.05)]">
                     <Image
                       src={item.image_url || "/placeholder-news.jpg"}
                       alt={item.title}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                    <div className="absolute top-2 left-2 bg-white border border-slate-900 px-2 py-1">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-slate-900">{categoryName}</span>
-                    </div>
                   </div>
-                  <div className="sm:col-span-3 flex flex-col gap-3 justify-center">
+                  <div className="sm:col-span-7 flex flex-col gap-4 justify-center">
                     <Link href={`/noticia/${item.slug}`}>
-                      <h4 className="text-xl font-black italic tracking-tighter leading-tight group-hover:text-accent transition-colors overflow-hidden text-ellipsis line-clamp-2">
-                        {item.title}...
+                      <h4 className="text-2xl font-black italic tracking-tighter leading-[0.95] group-hover:opacity-60 transition-all overflow-hidden text-ellipsis line-clamp-3">
+                        {item.title}
                       </h4>
                     </Link>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                      {new Date(item.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}.
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">
+                      {new Date(item.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                     </span>
                   </div>
                 </div>

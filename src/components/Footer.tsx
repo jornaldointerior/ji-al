@@ -21,63 +21,65 @@ const INSTITUTIONAL = [
 
 export default function Footer() {
   return (
-    <footer className="bg-primary pt-16 pb-8 text-white mt-auto">
-      <Container className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+    <footer className="bg-slate-950 pt-24 pb-12 text-white mt-auto border-t-[4px] border-accent">
+      <Container className="grid md:grid-cols-2 lg:grid-cols-4 gap-16">
 
         {/* About */}
-        <div className="flex flex-col gap-6">
-          <p className="text-xs font-sans font-medium text-slate-200 leading-relaxed max-w-xs">
-            Levando a verdade e os acontecimentos mais relevantes para o seu dia a dia.
-          </p>
-          <div className="flex gap-4">
-            <a href="#" aria-label="Facebook" className="hover:text-accent transition-colors"><Facebook size={18} /></a>
-            <a href="#" aria-label="Instagram" className="hover:text-accent transition-colors"><Instagram size={18} /></a>
-            <a href="#" aria-label="Twitter" className="hover:text-accent transition-colors"><Twitter size={18} /></a>
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-3xl font-black italic tracking-tighter leading-none uppercase">JORNAL DO INTERIOR.</h2>
+            <p className="text-[11px] font-bold text-slate-400 leading-relaxed max-w-xs uppercase tracking-widest">
+              Levando a verdade e os acontecimentos mais relevantes para o seu dia a dia desde 2024.
+            </p>
+          </div>
+          <div className="flex gap-6">
+            <a href="#" aria-label="Facebook" className="hover:text-accent transition-all hover:-translate-y-1"><Facebook size={20} strokeWidth={2.5} /></a>
+            <a href="#" aria-label="Instagram" className="hover:text-accent transition-all hover:-translate-y-1"><Instagram size={20} strokeWidth={2.5} /></a>
+            <a href="#" aria-label="Twitter" className="hover:text-accent transition-all hover:-translate-y-1"><Twitter size={20} strokeWidth={2.5} /></a>
           </div>
         </div>
 
         {/* Institutional */}
-        <div className="flex flex-col gap-6">
-          <h3 className="text-sm font-sans font-black uppercase tracking-widest">Institucional</h3>
-          <ul className="flex flex-col gap-3 text-xs font-sans font-bold text-slate-200">
+        <div className="flex flex-col gap-8">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500">Institucional</h3>
+          <ul className="flex flex-col gap-4 text-[11px] font-black text-white">
             {INSTITUTIONAL.map(link => (
               <li key={link.href}>
                 {link.href.startsWith("mailto") ? (
                   <a
                     href={link.href}
-                    className="hover:text-white transition-colors uppercase tracking-widest relative z-50"
+                    className="hover:text-accent transition-all uppercase tracking-widest relative z-50 inline-block hover:translate-x-1"
                   >
                     {link.label}
                   </a>
                 ) : (
                   <Link
                     href={link.href}
-                    className="hover:text-white transition-colors uppercase tracking-widest relative z-50"
+                    className="hover:text-accent transition-all uppercase tracking-widest relative z-50 inline-block hover:translate-x-1"
                   >
                     {link.label}
                   </Link>
                 )}
               </li>
             ))}
-            {/* Acesso Restrito — Link component for SPA navigation */}
             <li>
               <Link
                 href="/admin"
-                className="text-accent hover:text-white transition-colors uppercase tracking-widest relative z-50"
+                className="text-accent hover:opacity-70 transition-all uppercase tracking-widest relative z-50 inline-block hover:translate-x-1"
               >
-                Acesso Restrito
+                Painel Administrativo
               </Link>
             </li>
           </ul>
         </div>
 
         {/* Categories */}
-        <div className="flex flex-col gap-6">
-          <h3 className="text-sm font-sans font-black uppercase tracking-widest">Categorias</h3>
-          <ul className="flex flex-col gap-3 text-xs font-sans font-bold text-slate-200 uppercase tracking-widest">
+        <div className="flex flex-col gap-8">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500">Editorias</h3>
+          <ul className="flex flex-col gap-4 text-[11px] font-black text-white uppercase tracking-widest">
             {CATEGORIES.map(cat => (
               <li key={cat.href}>
-                <Link href={cat.href} className="hover:text-accent transition-colors relative z-50">
+                <Link href={cat.href} className="hover:text-accent transition-all inline-block hover:translate-x-1">
                   {cat.label}
                 </Link>
               </li>
@@ -86,10 +88,10 @@ export default function Footer() {
         </div>
 
         {/* Newsletter */}
-        <div className="flex flex-col gap-6">
-          <h3 className="text-sm font-sans font-black uppercase tracking-widest">Newsletter</h3>
-          <p className="text-xs font-sans font-medium text-slate-200">
-            Assine nossa newsletter e receba notícias em primeira mão no seu e-mail.
+        <div className="flex flex-col gap-8">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500">Newsletter</h3>
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+            Assine nossa newsletter e receba notícias em primeira mão no seu e-mail corporativo.
           </p>
           <form
             onSubmit={e => {
@@ -98,20 +100,20 @@ export default function Footer() {
               const email = (form.elements.namedItem("email") as HTMLInputElement)?.value;
               if (email) window.open(`mailto:contato@jornaldointerior.com.br?subject=Newsletter&body=Cadastro: ${email}`);
             }}
-            className="flex gap-2"
+            className="flex flex-col gap-3"
           >
             <input
               type="email"
               name="email"
               required
-              placeholder="Seu e-mail..."
-              className="flex-1 bg-white/5 border border-white/10 px-4 py-2 text-xs font-sans focus:outline-none focus:border-accent transition-colors"
+              placeholder="SEU MELHOR E-MAIL..."
+              className="bg-slate-900 border-[2px] border-slate-800 px-5 py-4 text-[11px] font-black tracking-widest focus:outline-none focus:border-accent transition-all placeholder:text-slate-700"
             />
             <button
               type="submit"
-              className="bg-white text-primary px-4 py-2 hover:bg-accent hover:text-white transition-colors cursor-pointer relative z-50"
+              className="bg-white text-slate-950 px-6 py-4 font-black uppercase tracking-[0.3em] text-[11px] hover:bg-accent hover:text-white transition-all cursor-pointer relative z-50 active:scale-[0.98]"
             >
-              <Send size={16} />
+              Inscrever-se AGORA
             </button>
           </form>
         </div>

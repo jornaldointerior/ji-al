@@ -32,7 +32,7 @@ export default function Home() {
         <MagazineSection 
           sectionId="alagoas" 
           title="Alagoas" 
-          accentColor="#2563eb" 
+          accentColor="#1e40af" 
           categoryName="Alagoas" 
         />
 
@@ -40,7 +40,7 @@ export default function Home() {
         <MagazineSection 
           sectionId="brasil" 
           title="Brasil" 
-          accentColor="#059669" 
+          accentColor="#047857" 
           categoryName="Brasil" 
         />
 
@@ -48,7 +48,7 @@ export default function Home() {
         <MagazineSection 
           sectionId="mundo" 
           title="Mundo" 
-          accentColor="#7c3aed" 
+          accentColor="#be123c" 
           categoryName="Mundo" 
         />
 
@@ -56,7 +56,7 @@ export default function Home() {
         <MagazineSection 
           sectionId="esportes" 
           title="Esportes" 
-          accentColor="#ca8a04" 
+          accentColor="#b45309" 
           categoryName="Esportes" 
         />
 
@@ -64,7 +64,7 @@ export default function Home() {
         <MagazineSection 
           sectionId="cultura" 
           title="Cultura" 
-          accentColor="#db2777" 
+          accentColor="#9d174d" 
           categoryName="Cultura e Entretenimento" 
         />
       </motion.main>
