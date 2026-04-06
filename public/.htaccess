@@ -1,14 +1,10 @@
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  
-  # Redirect /index.html to / (except for actual file requests)
-  RewriteRule ^index\.html$ / [R=301,L]
-  
-  # If the requested resource is not a file and not a directory...
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  
-  # ...then rewrite it to index.html (Next.js SPA routing)
-  RewriteRule . /index.html [L]
-</IfModule>
+RewriteEngine On
+RewriteBase /
+
+# Provide index.html for folders (essential for trailingSlash: true)
+DirectoryIndex index.html
+
+# Se o link for /login, ele procura /login/index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]

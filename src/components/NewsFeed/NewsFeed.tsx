@@ -95,8 +95,8 @@ export default function NewsFeed() {
               
               {/* Dynamic Grid Layout */}
               <div className={cn(
-                "grid gap-16",
-                isEven ? "lg:grid-cols-12" : "lg:grid-cols-3"
+                "grid grid-cols-1 gap-12 md:gap-16",
+                isEven ? "lg:grid-cols-12" : "md:grid-cols-2 lg:grid-cols-3"
               )}>
                 {isEven ? (
                   <>
@@ -112,7 +112,7 @@ export default function NewsFeed() {
                          className="h-full" 
                         />
                     </div>
-                    <div className="lg:col-span-4 flex flex-col gap-12">
+                    <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:flex lg:flex-col gap-10 md:gap-12">
                        {catNews.slice(1).map(news => (
                          <NewsCard 
                            key={news.id} 

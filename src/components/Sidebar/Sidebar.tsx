@@ -12,25 +12,75 @@ const WEATHER_CITIES = [
   { name: "Maceió", lat: -9.6498, lon: -35.7089 },
   { name: "Arapiraca", lat: -9.7516, lon: -36.6601 },
   { name: "Delmiro Gouveia", lat: -9.3894, lon: -37.9994 },
-  { name: "Piranhas", lat: -9.6239, lon: -37.7558 }
+  { name: "Piranhas", lat: -9.6239, lon: -37.7558 },
+  { name: "Palmeira dos Índios", lat: -9.4072, lon: -36.6311 },
+  { name: "Santana do Ipanema", lat: -9.3783, lon: -37.2436 },
+  { name: "Penedo", lat: -10.2897, lon: -36.5855 },
+  { name: "União dos Palmares", lat: -9.1601, lon: -36.0315 },
+  { name: "Marechal Deodoro", lat: -9.7107, lon: -35.8947 },
+  { name: "Coruripe", lat: -10.1256, lon: -36.1756 }
 ];
 
+interface WeatherData {
+  city: string;
+  temp: number;
+  status: string;
+  humidity: number;
+}
+
+interface PollOption {
+  id: string;
+  text: string;
+  votes: number;
+  order: number;
+}
+
+interface Poll {
+  id: string;
+  question: string;
+  is_active: boolean;
+  poll_options: PollOption[];
+}
+
+interface SidebarArticle {
+  id: string;
+  title: string;
+  published_at: string;
+  slug: string;
+  categories: { name: string } | { name: string }[] | null;
+}
+
 export default function Sidebar() {
-  const [currentCityIndex, setCurrentCityIndex] = useState(0);
-  const [weatherData, setWeatherData] = useState<any[]>([]);
+  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [mostRead, setMostRead] = useState<any[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [mostRead, setMostRead] = useState<SidebarArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [weatherLoading, setWeatherLoading] = useState(true);
   
-  const pollOptions = [
-    { id: 1, text: "Sim, é necessário mais fiscalização.", percent: 68 },
-    { id: 2, text: "Não, prejudica os pequenos produtores.", percent: 24 },
-    { id: 3, text: "Não tenho uma opinião formada.", percent: 8 }
-  ];
+  const [activePoll, setActivePoll] = useState<Poll | null>(null);
+  const [pollLoading, setPollLoading] = useState(true);
 
   useEffect(() => {
+    async function fetchActivePoll() {
+      setPollLoading(true);
+      const { data: poll, error } = await supabase
+        .from("polls")
+        .select("*, poll_options(*)")
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (poll && !error) {
+        setActivePoll(poll);
+        const votedId = localStorage.getItem(`voted_poll_${poll.id}`);
+        if (votedId) {
+          setHasVoted(true);
+          setSelectedOption(votedId);
+        }
+      }
+      setPollLoading(false);
+    }
+
     async function fetchSidebarData() {
       const { data, error } = await supabase
         .from("articles")
@@ -53,24 +103,22 @@ export default function Sidebar() {
     async function fetchWeather() {
       try {
         const results = await Promise.all(WEATHER_CITIES.map(async (city) => {
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`);
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto`);
           const data = await res.json();
           
-          // Map weather codes to simple status or more descriptive ones
           const code = data.current.weather_code;
-          let status = "Céu Limpo";
-          if (code > 0 && code <= 3) status = "Parcialmente Nublado";
+          let status = "Limpo";
+          if (code > 0 && code <= 3) status = "Nublado";
           else if (code >= 45 && code <= 48) status = "Nevoeiro";
-          else if (code >= 51 && code <= 67) status = "Chuva Leve";
-          else if (code >= 71 && code <= 86) status = "Possibilidade de Chuva";
+          else if (code >= 51 && code <= 67) status = "Chuva";
+          else if (code >= 71 && code <= 86) status = "Chuva";
           else if (code >= 95) status = "Tempestade";
 
           return {
             city: city.name,
             temp: Math.round(data.current.temperature_2m),
             status: status,
-            humidity: data.current.relative_humidity_2m,
-            wind: Math.round(data.current.wind_speed_10m)
+            humidity: data.current.relative_humidity_2m
           };
         }));
         setWeatherData(results);
@@ -81,77 +129,75 @@ export default function Sidebar() {
       }
     }
 
+    fetchActivePoll();
     fetchSidebarData();
     fetchWeather();
-
-    const timer = setInterval(() => {
-      setCurrentCityIndex((prev) => (prev + 1) % WEATHER_CITIES.length);
-    }, 8000);
-    return () => clearInterval(timer);
   }, []);
 
-  const cityData = weatherData[currentCityIndex] || { city: "Maceió", temp: "--", status: "Carregando...", humidity: "--", wind: "--" };
+  const handleVote = async (optionId: string) => {
+    if (!activePoll) return;
+    
+    setSelectedOption(optionId);
+    setHasVoted(true);
+    localStorage.setItem(`voted_poll_${activePoll.id}`, optionId);
+
+    // Optimistic update
+    const updatedOptions = activePoll.poll_options.map((opt: PollOption) => 
+      opt.id === optionId ? { ...opt, votes: (opt.votes || 0) + 1 } : opt
+    );
+    setActivePoll({ ...activePoll, poll_options: updatedOptions });
+
+    // Update DB
+    const option = activePoll.poll_options.find((opt: PollOption) => opt.id === optionId);
+    if (option) {
+      await supabase
+        .from("poll_options")
+        .update({ votes: (option.votes || 0) + 1 })
+        .eq("id", optionId);
+    }
+  };
 
   return (
     <aside className="w-full h-full flex flex-col gap-12">
       {/* Weather Widget */}
-      <div className="bg-white p-6 border border-slate-200 group relative">
-        <div className="flex justify-between items-start mb-6">
-          <Headline variant="secondary" className="text-[9px] uppercase tracking-[0.4em] font-black text-slate-600">
+      <div className="bg-white p-6 border border-slate-200 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-accent" />
+        <div className="flex justify-between items-center mb-6">
+          <Headline variant="secondary" className="text-[10px] uppercase tracking-[0.4em] font-black text-slate-600">
             Céu de Alagoas
           </Headline>
-          <div className="flex items-center gap-1.5 text-[9px] font-sans font-black text-accent uppercase tracking-widest">
-            <MapPin size={10} />
-            {cityData.city}
-          </div>
+          <Cloud size={16} className="text-accent" />
         </div>
         
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={cityData.city}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-baseline justify-between"
-          >
-            <div className="flex items-baseline gap-1">
-              <span className="text-6xl font-serif font-black text-primary leading-none tracking-tighter">
-                {cityData.temp}
-              </span>
-              <span className="text-xl font-serif font-bold text-slate-400">°C</span>
-            </div>
-            <motion.div 
-              animate={{ rotate: [0, 5, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="text-accent"
-            >
-              {typeof cityData.temp === 'number' && cityData.temp > 30 ? (
-                <Sun size={48} strokeWidth={1.5} />
-              ) : (
-                <Cloud size={48} strokeWidth={1.5} />
-              )}
-            </motion.div>
-          </motion.div>
-        </AnimatePresence>
-        
-        <div className="mt-2 mb-6">
-          <span className="text-[11px] text-primary font-serif font-bold italic lowercase tracking-wide">
-            {cityData.status}
-          </span>
-        </div>
-        
-        <div className="pt-5 border-t border-slate-100 flex justify-between text-[9px] text-slate-600 font-sans font-black uppercase tracking-[0.2em]">
-          <div className="flex items-center gap-2">
-            <span>Umidade {cityData.humidity}%</span>
+        {weatherLoading ? (
+          <div className="py-8 flex justify-center">
+            <Loader2 className="animate-spin text-accent" size={24} />
           </div>
-          <div className="flex items-center gap-2">
-            <span>Vento {cityData.wind}kmh</span>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+            {weatherData.map((data) => (
+              <div key={data.city} className="flex flex-col border-b border-dashed border-slate-100 pb-2 last:border-0">
+                <div className="flex justify-between items-baseline mb-1">
+                  <span className="text-[10px] font-sans font-black text-primary uppercase tracking-tighter truncate max-w-[100px]">
+                    {data.city}
+                  </span>
+                  <div className="flex items-center gap-0.5">
+                    <span className="text-lg font-serif font-black text-primary">{data.temp}</span>
+                    <span className="text-[10px] font-serif font-bold text-slate-400">°C</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-[8px] uppercase font-black tracking-widest text-slate-400">
+                  <span>{data.status}</span>
+                  <span className="flex items-center gap-1"><MapPin size={8} className="text-accent" /> {data.humidity}%</span>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
 
       {/* Poll Widget */}
-      <div className="bg-white p-8 border border-slate-200 relative">
+      <div className="bg-white p-6 md:p-8 border border-slate-200 relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-accent" />
         <div className="flex items-center gap-3 mb-6">
           <Headline variant="accent" className="text-[10px] leading-none">
@@ -160,66 +206,77 @@ export default function Sidebar() {
           <div className="h-px bg-slate-100 flex-1" />
         </div>
         
-        <p className="text-xl font-serif font-black text-primary mb-8 leading-[1.25] tracking-tight">
-          Você concorda com as novas diretrizes de fiscalização agrícola no interior?
-        </p>
-        
-        <div className="flex flex-col gap-4">
-          <AnimatePresence mode="wait">
-            {!hasVoted ? (
-              <motion.div 
-                key="poll-options"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-3"
-              >
-                {pollOptions.map((opt) => (
-                  <button 
-                    key={opt.id}
-                    onClick={() => {
-                      setSelectedOption(opt.id);
-                      setHasVoted(true);
-                    }}
-                    className="text-left w-full p-4 border border-slate-100 text-[10px] font-sans font-black uppercase tracking-widest text-slate-700 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center group/btn"
+        {pollLoading ? (
+            <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-accent" size={20} /></div>
+        ) : activePoll ? (
+          <>
+            <p className="text-lg md:text-xl font-serif font-black text-primary mb-8 leading-[1.25] tracking-tight">
+              {activePoll.question}
+            </p>
+            
+            <div className="flex flex-col gap-4">
+              <AnimatePresence mode="wait">
+                {!hasVoted ? (
+                  <motion.div 
+                    key="poll-options"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-3"
                   >
-                    {opt.text}
-                    <ArrowRight size={14} className="opacity-0 group-hover/btn:opacity-100 -translate-x-2 group-hover/btn:translate-x-0 transition-all text-accent" />
-                  </button>
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="poll-results"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="space-y-6"
-              >
-                {pollOptions.map((opt) => (
-                  <div key={opt.id} className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-sans font-black uppercase tracking-widest text-primary">
-                      <span className={cn(selectedOption === opt.id && "text-accent")}>
+                    {activePoll.poll_options.sort((a: any, b: any) => a.order - b.order).map((opt: any) => (
+                      <button 
+                        key={opt.id}
+                        onClick={() => handleVote(opt.id)}
+                        className="text-left w-full p-4 border border-slate-100 text-[10px] font-sans font-black uppercase tracking-widest text-slate-700 hover:border-accent hover:bg-slate-50 hover:text-primary transition-all flex justify-between items-center min-h-[54px] group/btn"
+                      >
                         {opt.text}
-                      </span>
-                      <span>{opt.percent}%</span>
+                        <ArrowRight size={14} className="opacity-0 group-hover/btn:opacity-100 -translate-x-2 group-hover/btn:translate-x-0 transition-all text-accent" />
+                      </button>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    key="poll-results"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="space-y-6"
+                  >
+                    {(() => {
+                      const totalVotes = activePoll.poll_options.reduce((acc: number, curr: any) => acc + (curr.votes || 0), 0) || 1;
+                      return activePoll.poll_options.sort((a: any, b: any) => a.order - b.order).map((opt: any) => {
+                        const percent = Math.round(((opt.votes || 0) / totalVotes) * 100);
+                        return (
+                          <div key={opt.id} className="space-y-2">
+                            <div className="flex justify-between text-[10px] font-sans font-black uppercase tracking-widest text-primary">
+                              <span className={cn(selectedOption === opt.id && "text-accent")}>
+                                {opt.text}
+                              </span>
+                              <span>{percent}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-slate-50 rounded-none overflow-hidden">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${percent}%` }}
+                                transition={{ duration: 1.2, ease: "circOut" }}
+                                className={cn("h-full", selectedOption === opt.id ? "bg-accent" : "bg-primary")}
+                              />
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                    <div className="pt-4 text-[9px] text-slate-500 font-sans font-black uppercase tracking-[0.3em] text-center italic">
+                      Voto computado. Obrigado!
                     </div>
-                    <div className="h-1.5 w-full bg-slate-50 rounded-none overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${opt.percent}%` }}
-                        transition={{ duration: 1.2, ease: "circOut" }}
-                        className={cn("h-full", selectedOption === opt.id ? "bg-accent" : "bg-primary")}
-                      />
-                    </div>
-                  </div>
-                ))}
-                <div className="pt-4 text-[9px] text-slate-500 font-sans font-black uppercase tracking-[0.3em] text-center italic">
-                  Voto computado. Obrigado!
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </>
+        ) : (
+          <div className="py-10 text-center text-slate-300 font-serif italic text-sm">Nenhuma enquete ativa no momento.</div>
+        )}
       </div>
 
       {/* Most Read List */}
@@ -239,11 +296,13 @@ export default function Sidebar() {
           <div className="flex flex-col divide-y divide-slate-100">
             {mostRead.map((news, index) => (
               <Link key={news.id} href={`/noticia/${news.slug}`} className="group py-6 first:pt-0 last:pb-0 flex gap-6 items-start">
-                <span className="text-4xl font-serif font-black text-slate-200 group-hover:text-accent transition-colors leading-[0.7] pt-1">
+                <span className="text-3xl md:text-4xl font-serif font-black text-slate-200 group-hover:text-accent transition-colors leading-[0.7] pt-1">
                   {String(index + 1)}
                 </span>
                 <div className="flex flex-col gap-2 flex-1">
-                  <span className="text-[8px] uppercase font-black text-accent font-sans tracking-[0.3em]">{news.categories?.name}</span>
+                  <span className="text-[8px] uppercase font-black text-accent font-sans tracking-[0.3em]">
+                    {Array.isArray(news.categories) ? news.categories[0]?.name : news.categories?.name}
+                  </span>
                   <p className="text-sm font-serif font-black leading-snug text-primary group-hover:text-accent transition-colors line-clamp-2 uppercase- tracking-tight">
                     {news.title}
                   </p>
@@ -261,7 +320,7 @@ export default function Sidebar() {
       </div>
 
       {/* Static Ad Space */}
-      <div className="bg-slate-50 h-80 border border-slate-200 flex flex-col items-center justify-center p-8 text-center group cursor-pointer hover:bg-slate-100 transition-colors">
+      <div className="bg-slate-50 h-64 md:h-80 border border-slate-200 flex flex-col items-center justify-center p-8 text-center group cursor-pointer hover:bg-slate-100 transition-colors">
         <div className="mb-4 px-3 py-1 bg-white border border-slate-200 text-[8px] uppercase tracking-[0.3em] font-black text-slate-300">Anúncio</div>
         <span className="text-[10px] uppercase tracking-[0.4em] font-black text-slate-300 group-hover:text-slate-500 transition-colors">
           Espaço Reservado
@@ -269,7 +328,7 @@ export default function Sidebar() {
       </div>
 
       {/* Acesso Exclusivo Widget */}
-      <div className="bg-primary p-10 text-white shadow-2xl relative overflow-hidden group">
+      <div className="bg-primary p-8 md:p-10 text-white shadow-2xl relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-[2px] bg-accent" />
         <div className="absolute -right-12 -top-12 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-accent/20 transition-all duration-1000" />
         
@@ -279,7 +338,7 @@ export default function Sidebar() {
             <div className="h-px bg-white/10 flex-1" />
           </div>
           
-          <p className="text-xl font-serif italic text-white/90 mb-8 leading-tight">
+          <p className="text-lg md:text-xl font-serif italic text-white/90 mb-8 leading-tight">
             Assine para receber furos e análises profundas.
           </p>
           
@@ -288,7 +347,7 @@ export default function Sidebar() {
               <input 
                 type="email" 
                 placeholder="SEU MELHOR E-MAIL" 
-                className="w-full bg-white/5 border border-white/10 px-5 py-4 text-[10px] uppercase tracking-widest focus:border-accent focus:bg-white/10 outline-none transition-all pr-12"
+                className="w-full bg-white/5 border border-white/10 px-5 py-4 text-base md:text-[10px] uppercase tracking-widest focus:border-accent focus:bg-white/10 outline-none transition-all pr-12"
               />
               <Send size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-accent transition-colors" />
             </div>

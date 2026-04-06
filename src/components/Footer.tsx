@@ -1,18 +1,21 @@
+"use client";
+
+import Link from "next/link";
 import { Facebook, Instagram, Twitter, Send } from "lucide-react";
 import Container from "./ui/Container";
 
 const CATEGORIES = [
-  { label: "Alagoas", href: "/categoria/alagoas/" },
-  { label: "Brasil", href: "/categoria/brasil/" },
-  { label: "Mundo", href: "/categoria/mundo/" },
-  { label: "Esportes", href: "/categoria/esportes/" },
-  { label: "Cultura e Entretenimento", href: "/categoria/cultura-e-entretenimento/" },
+  { label: "Alagoas", href: "/categoria/alagoas" },
+  { label: "Brasil", href: "/categoria/brasil" },
+  { label: "Mundo", href: "/categoria/mundo" },
+  { label: "Esportes", href: "/categoria/esportes" },
+  { label: "Cultura e Entretenimento", href: "/categoria/cultura-e-entretenimento" },
 ];
 
 const INSTITUTIONAL = [
-  { label: "Sobre o Jornal", href: "/sobre/" },
+  { label: "Sobre o Jornal", href: "/sobre" },
   { label: "Anuncie Conosco", href: "mailto:contato@jornaldointerior.com.br" },
-  { label: "Política de Privacidade", href: "/privacidade/" },
+  { label: "Política de Privacidade", href: "/privacidade" },
   { label: "Trabalhe Conosco", href: "mailto:redacao@jornaldointerior.com.br" },
 ];
 
@@ -39,26 +42,31 @@ export default function Footer() {
           <ul className="flex flex-col gap-3 text-xs font-sans font-bold text-slate-200">
             {INSTITUTIONAL.map(link => (
               <li key={link.href}>
-                {/*
-                  Âncora nativa — não passa pelo roteador SPA.
-                  mailto: abre o cliente de email. Hrefs absolutos abrem a página direto.
-                */}
-                <a
-                  href={link.href}
-                  className="hover:text-white transition-colors uppercase tracking-widest"
-                >
-                  {link.label}
-                </a>
+                {link.href.startsWith("mailto") ? (
+                  <a
+                    href={link.href}
+                    className="hover:text-white transition-colors uppercase tracking-widest relative z-50"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    href={link.href}
+                    className="hover:text-white transition-colors uppercase tracking-widest relative z-50"
+                  >
+                    {link.label}
+                  </Link>
+                )}
               </li>
             ))}
-            {/* Acesso Restrito — hard link para evitar intercepção do roteador */}
+            {/* Acesso Restrito — Link component for SPA navigation */}
             <li>
-              <a
-                href="/admin/"
-                className="text-accent hover:text-white transition-colors uppercase tracking-widest"
+              <Link
+                href="/admin"
+                className="text-accent hover:text-white transition-colors uppercase tracking-widest relative z-50"
               >
                 Acesso Restrito
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
@@ -69,10 +77,9 @@ export default function Footer() {
           <ul className="flex flex-col gap-3 text-xs font-sans font-bold text-slate-200 uppercase tracking-widest">
             {CATEGORIES.map(cat => (
               <li key={cat.href}>
-                {/* Âncora nativa — garante navegação mesmo em static export */}
-                <a href={cat.href} className="hover:text-accent transition-colors">
+                <Link href={cat.href} className="hover:text-accent transition-colors relative z-50">
                   {cat.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -102,7 +109,7 @@ export default function Footer() {
             />
             <button
               type="submit"
-              className="bg-white text-primary px-4 py-2 hover:bg-accent hover:text-white transition-colors"
+              className="bg-white text-primary px-4 py-2 hover:bg-accent hover:text-white transition-colors cursor-pointer relative z-50"
             >
               <Send size={16} />
             </button>
@@ -118,7 +125,7 @@ export default function Footer() {
             href="https://mickaaportifolio-xcsv.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-white hover:text-accent transition-colors"
+            className="text-white hover:text-accent transition-colors relative z-50"
           >
             MICKA BANDEIRA
           </a>

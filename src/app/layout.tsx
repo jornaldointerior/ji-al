@@ -19,6 +19,12 @@ export const metadata: Metadata = {
   description: "O portal de notícias mais completo do interior, com política, economia, cultura e eventos em tempo real.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 import GlobalTracker from "@/components/analytics/GlobalTracker";
 
 export default function RootLayout({

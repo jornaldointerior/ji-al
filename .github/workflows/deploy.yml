@@ -29,10 +29,19 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
-      - name: 🛠️ Sanitize Build (Rename _next to static_next)
+      - name: 🛠️ Sanitize Build (Anti-Error)
         run: |
-          mv ./out/_next ./out/static_next
-          find ./out -type f \( -name "*.html" -o -name "*.js" -o -name "*.json" -o -name "*.css" \) -exec sed -i 's/_next/static_next/g' {} +
+          # Verifica se a pasta existe antes de tentar renomear
+          if [ -d "./out/_next" ]; then
+            mv ./out/_next ./out/static_next
+            echo "Pasta _next renomeada com sucesso."
+          else
+            echo "Pasta _next não encontrada, ignorando renomeação."
+          fi
+          
+          # Substitui referências. O '|| true' garante que o script não pare se não houver o que substituir
+          grep -rl '_next' ./out | xargs sed -i 's/_next/static_next/g' || true
+          echo "Substituições de texto concluídas."
 
       - name: 📦 Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
@@ -46,10 +55,12 @@ jobs:
           lftp -e "
           set ftp:ssl-allow no;
           set ssl:verify-certificate no;
-          set ftp:use-mdtm yes;
-          set net:max-retries 3;
+          set ftp:passive-mode true;
+          set net:timeout 30;
+          set net:max-retries 10;
           open $FTP_SERVER;
           user $FTP_USERNAME $FTP_PASSWORD;
-          mirror --reverse --delete --parallel=5 --no-perms ./out/ ./public_html/;
+          # O comando --no-perms é essencial para a Hostinger
+          mirror --reverse --delete --parallel=1 --no-perms ./out/ ./;
           bye
           "

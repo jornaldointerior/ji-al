@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useEffect, use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,51 +5,50 @@ import { supabase } from "@/lib/supabase";
 import Container from "@/components/ui/Container";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Headline from "@/components/ui/Headline";
-import { ChevronLeft, Share2, Printer, Bookmark, Loader2 } from "lucide-react";
+import { ChevronLeft, Share2, Printer, Bookmark } from "lucide-react";
 
 interface ArticleParams {
   slug: string;
 }
 
-export default function ArticlePage({ params }: { params: Promise<ArticleParams> }) {
-  const { slug } = use(params);
-  const [news, setNews] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+export async function generateStaticParams() {
+  try {
+    const { data: articles } = await supabase
+      .from("articles")
+      .select("slug");
 
-  useEffect(() => {
-    async function fetchArticle() {
-      const { data, error } = await supabase
-        .from("articles")
-        .select(`
-          *,
-          categories (name)
-        `)
-        .eq("slug", slug)
-        .single();
+    const paths = (articles || []).map((article) => ({
+      slug: article.slug,
+    }));
 
-      if (data && !error) {
-        setNews(data);
-        
-        // Increment view count securely via RPC instead of raw update to avoid race conditions
-        await supabase.rpc('increment_view_count', { article_id: data.id });
-      }
-      setLoading(false);
+    if (paths.length === 0) {
+      return [{ slug: 'placeholder-noticia' }];
     }
 
-    fetchArticle();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="animate-spin text-accent" size={48} />
-      </div>
-    );
+    return paths;
+  } catch (e) {
+    return [{ slug: 'placeholder-noticia' }];
   }
+}
 
-  if (!news) {
+export default async function ArticlePage({ params }: { params: Promise<ArticleParams> }) {
+  const { slug } = await params;
+
+  const { data: news, error } = await supabase
+    .from("articles")
+    .select(`
+      *,
+      categories (name)
+    `)
+    .eq("slug", slug)
+    .single();
+
+  if (error || !news) {
     notFound();
   }
+
+  // NOTE: In a static build environment, client-side interactions should handle increments if needed.
+  // For build-time generation, we just fetch the content.
 
   return (
     <article className="py-10 bg-white min-h-screen">
@@ -98,19 +94,22 @@ export default function ArticlePage({ params }: { params: Promise<ArticleParams>
           </header>
 
           {/* Featured Image */}
-          <div className="relative aspect-[16/9] w-full overflow-hidden shadow-2xl">
+          <div className="relative aspect-[16/9] w-full overflow-hidden shadow-2xl bg-slate-50">
             <Image
               src={news.image_url || "/placeholder-news.jpg"}
               alt={news.title}
               fill
-              className="object-cover"
+              className="object-contain"
               priority
             />
           </div>
 
           {/* Body Content */}
           <div className="prose prose-slate prose-lg max-w-none font-serif leading-relaxed text-slate-800 text-xl tracking-wide selection:bg-accent/30">
-            <div dangerouslySetInnerHTML={{ __html: news.content }} />
+            <div 
+              className="whitespace-pre-line"
+              dangerouslySetInnerHTML={{ __html: news.content }} 
+            />
           </div>
           
           {/* Footer Tags */}
