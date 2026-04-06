@@ -103,7 +103,7 @@ export default function Hero() {
           {/* SECTION 1: MANCHETE PRINCIPAL (SÓ TEXTO) */}
           {headline && (
             <div className="relative w-full border-b-[3px] border-slate-950 pb-10 md:pb-16">
-               <span className="text-[12px] font-black uppercase tracking-[0.6em] text-accent mb-8 block">Sessão 01 / Manchete de Capa</span>
+               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent mb-8 block">Sessão 01 / Manchete de Capa</span>
                <Link href={`/noticia/${headline.slug}`} className="group cursor-pointer w-full block">
                 <Headline 
                   variant="massive" 
@@ -119,7 +119,7 @@ export default function Hero() {
           <div className="flex flex-col gap-12">
             <div className="flex items-center gap-5 border-b-2 border-slate-100 pb-6">
                <div className="w-3 h-3 bg-accent" />
-               <h3 className="text-[12px] font-black uppercase tracking-[0.5em] text-slate-950">Sessão 02 / Panorama Regional</h3>
+               <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-950">Sessão 02 / Panorama Regional</h3>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
