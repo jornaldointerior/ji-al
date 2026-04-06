@@ -101,11 +101,23 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
         imageUrl = publicUrlData.publicUrl;
       }
 
-      const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const baseSlug = formData.title
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+      
+      const slug = `${baseSlug}-${Math.random().toString(36).substr(2, 5)}`;
 
       if (mode === "create") {
         let authorId = null;
-        const { data: authors } = await supabase.from('authors').select('id').limit(1);
+        const { data: authors, error: authorError } = await supabase.from('authors').select('id').limit(1);
+        
+        if (authorError) {
+          console.warn("Could not fetch author, proceeding without author_id", authorError);
+        }
+
         if (authors && authors.length > 0) {
            authorId = authors[0].id;
         }
@@ -120,7 +132,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
           image_url: imageUrl,
           is_hero: formData.isHero,
           is_featured: formData.isFeatured,
-          published_at: new Date().toISOString(), // Forçando data exata para evitar falhas de default
+          published_at: new Date().toISOString(),
         });
 
         if (insertError) throw new Error(`Erro ao salvar no banco: ${insertError.message}`);
