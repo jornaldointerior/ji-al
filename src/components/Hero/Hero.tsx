@@ -107,7 +107,7 @@ export default function Hero() {
                <Link href={`/noticia/${headline.slug}`} className="group cursor-pointer w-full block">
                 <Headline 
                   variant="massive" 
-                  className="group-hover:opacity-75 transition-all duration-500 italic text-[clamp(1.8rem,5vw,4.5rem)]"
+                  className="group-hover:opacity-75 transition-all duration-500 italic text-[clamp(1.4rem,4.2vw,3.5rem)]"
                 >
                   {headline.title}
                 </Headline>
