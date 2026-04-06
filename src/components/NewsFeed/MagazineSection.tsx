@@ -64,7 +64,7 @@ export default function MagazineSection({ sectionId, title, accentColor = "#ff4d
           <div className="flex items-end justify-between border-b-4 border-slate-950 pb-8">
             <div className="flex flex-col gap-3">
               <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400">Editoria JI</span>
-              <Headline variant="massive" className="text-6xl md:text-8xl tracking-tighter mb-0 italic">
+              <Headline variant="massive" className="text-5xl md:text-7xl tracking-tighter mb-0 italic">
                 {title}<span style={{ color: accentColor }}>.</span>
               </Headline>
             </div>

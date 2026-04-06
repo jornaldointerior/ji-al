@@ -17,7 +17,7 @@ export default function Headline({
     primary: "text-primary font-black tracking-[-0.04em] font-serif leading-[0.95]",
     secondary: "text-muted font-bold font-sans uppercase tracking-[0.2em] text-[10px]",
     accent: "text-accent font-black font-sans uppercase tracking-[0.3em] text-[11px]",
-    massive: "text-primary text-[clamp(2.5rem,8vw,12rem)] font-black font-serif tracking-tighter leading-[0.88]",
+    massive: "text-primary text-[clamp(2.5rem,8vw,9rem)] font-black font-serif tracking-tighter leading-[0.88]",
   };
 
   return (
