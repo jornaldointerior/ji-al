@@ -53,14 +53,16 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           lftp -e "
+          debug 3;
           set ftp:ssl-allow no;
           set ssl:verify-certificate no;
           set ftp:passive-mode true;
           set net:timeout 30;
-          set net:max-retries 10;
+          set net:max-retries 20;
+          set net:reconnect-interval-base 5;
           open $FTP_SERVER;
           user $FTP_USERNAME $FTP_PASSWORD;
           # O comando --no-perms é essencial para a Hostinger
-          mirror --reverse --delete --parallel=1 --no-perms ./out/ ./;
+          mirror --reverse --delete --parallel=1 --no-perms --only-newer ./out/ ./;
           bye
           "
