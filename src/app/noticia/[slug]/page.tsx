@@ -106,10 +106,7 @@ export default async function ArticlePage({ params }: { params: Promise<ArticleP
 
           {/* Body Content */}
           <div className="prose prose-slate prose-lg max-w-none font-serif leading-relaxed text-slate-800 text-xl tracking-wide selection:bg-accent/30">
-            <div 
-              className="whitespace-pre-line"
-              dangerouslySetInnerHTML={{ __html: news.content }} 
-            />
+            <div dangerouslySetInnerHTML={{ __html: news.content }} />
           </div>
           
           {/* Footer Tags */}

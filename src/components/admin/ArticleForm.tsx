@@ -265,7 +265,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-900 ml-2">Corpo da Matéria</span>
               <Editor 
                 content={formData.content} 
-                onChange={(html) => setFormData({ ...formData, content: html })} 
+                onChange={(html) => setFormData(prev => ({ ...prev, content: html }))} 
               />
             </div>
           </div>
