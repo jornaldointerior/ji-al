@@ -11,25 +11,9 @@ interface ArticleParams {
   slug: string;
 }
 
-export async function generateStaticParams() {
-  try {
-    const { data: articles } = await supabase
-      .from("articles")
-      .select("slug");
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
-    const paths = (articles || []).map((article) => ({
-      slug: article.slug,
-    }));
-
-    if (paths.length === 0) {
-      return [{ slug: 'placeholder-noticia' }];
-    }
-
-    return paths;
-  } catch (e) {
-    return [{ slug: 'placeholder-noticia' }];
-  }
-}
 
 export default async function ArticlePage({ params }: { params: Promise<ArticleParams> }) {
   const { slug } = await params;
@@ -57,14 +41,14 @@ export default async function ArticlePage({ params }: { params: Promise<ArticleP
         <div className="lg:col-span-2 flex flex-col gap-8">
           {/* Breadcrumb & Navigation */}
           <nav className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="flex items-center gap-2 text-xs font-sans font-black uppercase text-slate-400 hover:text-primary transition-colors"
             >
               <ChevronLeft size={16} />
               Voltar para o Início
             </Link>
-            
+
             <div className="flex items-center gap-4 text-slate-400">
               <button className="hover:text-primary transition-colors cursor-pointer"><Share2 size={18} /></button>
               <button className="hover:text-primary transition-colors cursor-pointer"><Bookmark size={18} /></button>
@@ -77,7 +61,7 @@ export default async function ArticlePage({ params }: { params: Promise<ArticleP
             <div className="inline-block bg-primary text-white text-[10px] uppercase tracking-widest font-black px-3 py-1.5 font-sans w-fit shadow-lg">
               {news.categories?.name || "Geral"}
             </div>
-            
+
             <Headline as="h1" className="text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-primary">
               {news.title}
             </Headline>
@@ -108,7 +92,7 @@ export default async function ArticlePage({ params }: { params: Promise<ArticleP
           <div className="prose prose-slate prose-lg max-w-none font-serif leading-relaxed text-slate-800 text-xl tracking-wide selection:bg-accent/30">
             <div dangerouslySetInnerHTML={{ __html: news.content }} />
           </div>
-          
+
           {/* Footer Tags */}
           <footer className="mt-12 pt-8 border-t border-slate-100 flex flex-wrap gap-2">
             {["Educação", "Nordeste", "Desenvolvimento", news.categories?.name].filter(Boolean).map(tag => (

@@ -9,23 +9,13 @@ interface CategoryParams {
   slug: string;
 }
 
-export async function generateStaticParams() {
-  const categories = [
-    "alagoas",
-    "brasil",
-    "mundo",
-    "esportes",
-    "cultura-e-entretenimento"
-  ];
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
-  return categories.map((slug) => ({
-    slug,
-  }));
-}
 
 export default async function CategoryPage({ params }: { params: Promise<CategoryParams> }) {
   const { slug } = await params;
-  
+
   // Map slugs to display names
   const categoryMap: Record<string, string> = {
     "alagoas": "Alagoas",
@@ -79,7 +69,7 @@ export default async function CategoryPage({ params }: { params: Promise<Categor
               />
             ))}
           </div>
-          
+
           {(!articles || articles.length === 0) && (
             <div className="py-20 text-center border-2 border-dashed border-slate-100 italic text-slate-400">
               Nenhuma notícia encontrada nesta categoria no momento.
