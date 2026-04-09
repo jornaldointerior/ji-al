@@ -11,8 +11,25 @@ interface ArticleParams {
   slug: string;
 }
 
-export const revalidate = 0;
-export const dynamic = 'force-dynamic';
+export async function generateStaticParams() {
+  try {
+    const { data: articles } = await supabase
+      .from("articles")
+      .select("slug");
+
+    const paths = (articles || []).map((article) => ({
+      slug: article.slug,
+    }));
+
+    if (paths.length === 0) {
+      return [{ slug: 'placeholder-noticia' }];
+    }
+
+    return paths;
+  } catch (e) {
+    return [{ slug: 'placeholder-noticia' }];
+  }
+}
 
 
 export default async function ArticlePage({ params }: { params: Promise<ArticleParams> }) {

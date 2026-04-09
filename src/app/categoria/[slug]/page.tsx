@@ -9,8 +9,19 @@ interface CategoryParams {
   slug: string;
 }
 
-export const revalidate = 0;
-export const dynamic = 'force-dynamic';
+export async function generateStaticParams() {
+  const categories = [
+    "alagoas",
+    "brasil",
+    "mundo",
+    "esportes",
+    "cultura-e-entretenimento"
+  ];
+
+  return categories.map((slug) => ({
+    slug,
+  }));
+}
 
 
 export default async function CategoryPage({ params }: { params: Promise<CategoryParams> }) {
