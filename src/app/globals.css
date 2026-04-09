@@ -1,17 +1,22 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
-  --background: #fdfdfc; /* Premium Paper Bone (warmer off-white) */
-  --foreground: #020617; /* Deep Ink */
-  
+  --background: #fdfdfc;
+  /* Premium Paper Bone (warmer off-white) */
+  --foreground: #020617;
+  /* Deep Ink */
+
   --font-sans: var(--font-montserrat);
   --font-serif: var(--font-lora);
-  
+
   --color-primary: #020617;
-  --color-secondary: #f4f4f2; /* Old Paper */
-  --color-accent: #b91c1c; /* Signal Red */
+  --color-secondary: #f4f4f2;
+  /* Old Paper */
+  --color-accent: #b91c1c;
+  /* Signal Red */
   --color-paper: #ffffff;
-  
+
   --radius-xs: 0px;
   --radius-sm: 0px;
   --radius-md: 0px;
@@ -23,7 +28,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
-  
+
   --color-primary: var(--color-primary);
   --color-secondary: var(--color-secondary);
   --color-accent: var(--color-accent);
@@ -60,7 +65,11 @@
     user-select: none;
   }
 
-  h1, h2, h3, h4, .font-editorial {
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-editorial {
     font-family: var(--font-serif);
     font-weight: 900;
     letter-spacing: -0.04em;
@@ -75,15 +84,24 @@
     animation: reveal-up 1.2s cubic-bezier(0.2, 1, 0.3, 1) forwards;
   }
 
-  .stagger-1 { animation-delay: 0.1s; }
-  .stagger-2 { animation-delay: 0.2s; }
-  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  .stagger-3 {
+    animation-delay: 0.3s;
+  }
 
   @keyframes reveal-up {
     from {
       opacity: 0;
       transform: translateY(40px) skewY(2deg);
     }
+
     to {
       opacity: 1;
       transform: translateY(0) skewY(0deg);

@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 
-const Editor = dynamic(() => import("./Editor"), { 
+const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
   loading: () => <div className="w-full h-[600px] bg-slate-50 border-2 border-slate-900 border-dashed flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-300">Carregando Ferramentas de Escrita...</div>
 });
@@ -57,8 +57,8 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
       const { data, error } = await supabase.from("categories").select("id, name");
       if (data && !error) {
         setCategories(data);
-        if (data.length > 0 && !formData.categoryId) {
-          setFormData(prev => ({ ...prev, categoryId: data[0].id }));
+        if (data.length > 0 && formData.categoryId === "") {
+          setFormData(prev => ({ ...prev, categoryId: "none" }));
         }
       }
     }
@@ -108,19 +108,19 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)+/g, '');
-      
+
       const slug = `${baseSlug}-${Math.random().toString(36).substr(2, 5)}`;
 
       if (mode === "create") {
         let authorId = null;
         const { data: authors, error: authorError } = await supabase.from('authors').select('id').limit(1);
-        
+
         if (authorError) {
           console.warn("Could not fetch author, proceeding without author_id", authorError);
         }
 
         if (authors && authors.length > 0) {
-           authorId = authors[0].id;
+          authorId = authors[0].id;
         }
 
         const { error: insertError } = await supabase.from("articles").insert({
@@ -128,7 +128,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
           slug: slug,
           excerpt: formData.excerpt,
           content: formData.content,
-          category_id: formData.categoryId,
+          category_id: formData.categoryId === "none" ? null : formData.categoryId,
           author_id: authorId,
           image_url: imageUrl,
           is_hero: formData.isHero,
@@ -138,7 +138,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
         });
 
         if (insertError) throw new Error(`Erro ao salvar no banco: ${insertError.message}`);
-        
+
         setFormData({
           title: "", excerpt: "", content: "",
           categoryId: categories.length > 0 ? categories[0].id : "",
@@ -153,7 +153,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
           slug: slug,
           excerpt: formData.excerpt,
           content: formData.content,
-          category_id: formData.categoryId,
+          category_id: formData.categoryId === "none" ? null : formData.categoryId,
           image_url: imageUrl,
           is_hero: formData.isHero,
           is_featured: formData.isFeatured,
@@ -180,7 +180,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
     <div className="flex flex-col gap-12 max-w-[1400px] mx-auto pb-32">
       <AnimatePresence>
         {success && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -190,14 +190,14 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
             <div className="flex flex-col">
               <span className="font-black text-xs tracking-widest uppercase">Operação de Sucesso</span>
               <span className="text-[10px] opacity-90 uppercase font-bold tracking-tighter">
-                 {mode === "create" ? "A matéria já está ao vivo no portal." : "A matéria foi atualizada no portal."}
+                {mode === "create" ? "A matéria já está ao vivo no portal." : "A matéria foi atualizada no portal."}
               </span>
             </div>
           </motion.div>
         )}
-        
+
         {error && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -226,7 +226,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
               {mode === "create" ? "Redigir Matéria_" : "Editar Matéria_"}
             </Headline>
             <p className="font-serif italic text-slate-600 text-2xl max-w-3xl">
-              {mode === "create" 
+              {mode === "create"
                 ? "Preencha os campos abaixo para criar uma nova história impactante para o interior."
                 : "Ajuste os dados e detalhes da matéria previamente publicada no portal."
               }
@@ -263,9 +263,9 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
             {/* ── Main Post Body ──────────────────────────────────── */}
             <div className="flex flex-col gap-4">
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-900 ml-2">Corpo da Matéria</span>
-              <Editor 
-                content={formData.content} 
-                onChange={(html) => setFormData(prev => ({ ...prev, content: html }))} 
+              <Editor
+                content={formData.content}
+                onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
               />
             </div>
           </div>
@@ -280,11 +280,11 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
                 <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onChange={handleImageChange} />
                 {imagePreview ? (
                   <>
-                    <NextImage 
-                      src={imagePreview} 
-                      alt="Preview" 
+                    <NextImage
+                      src={imagePreview}
+                      alt="Preview"
                       fill
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
                       <span className="text-[10px] font-black uppercase tracking-widest text-white border-2 border-white px-4 py-2">Alterar Imagem</span>
@@ -305,19 +305,20 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
                   <label className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Canal Editorial</label>
                   {categories.length > 0 && <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" title="Sincronizado" />}
                 </div>
-                
+
                 {categories.length === 0 ? (
                   <div className="w-full h-14 bg-slate-50 border-2 border-slate-100 border-dashed flex items-center px-4 animate-pulse">
                     <div className="h-2 w-24 bg-slate-200 rounded" />
                   </div>
                 ) : (
                   <div className="relative group">
-                    <select 
+                    <select
                       className="w-full border-2 border-slate-100 p-5 bg-slate-50 uppercase text-[10px] tracking-[0.2em] font-black text-slate-900 outline-none focus:border-accent transition-all appearance-none cursor-pointer pr-12 relative z-10"
-                      value={formData.categoryId} 
-                      onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })} 
+                      value={formData.categoryId || "none"}
+                      onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                       required
                     >
+                      <option value="none">Nenhum (Só Destaque)</option>
                       {categories.map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                       ))}
@@ -338,12 +339,12 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
                   <LayoutIcon size={18} className="text-accent" />
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900">Destino na Home</h3>
                 </div>
-                
+
                 <div className="relative group">
-                  <select 
+                  <select
                     className="w-full border-2 border-slate-100 p-5 bg-slate-50 uppercase text-[10px] tracking-[0.2em] font-black text-slate-900 outline-none focus:border-accent transition-all appearance-none cursor-pointer pr-12 relative z-10"
-                    value={formData.homeSection} 
-                    onChange={(e) => setFormData({ ...formData, homeSection: e.target.value })} 
+                    value={formData.homeSection}
+                    onChange={(e) => setFormData({ ...formData, homeSection: e.target.value })}
                   >
                     <option value="default">Padrão (Sem Destaque Fixo)</option>
                     <option value="headline">1. Manchete Principal (Só Texto)</option>
@@ -366,15 +367,15 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
               {/* ── Feature Toggles ────────────────────────────────── */}
               <div className="flex flex-col gap-4 pt-6 border-t border-slate-100">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Distribuição Especial</label>
-                
+
                 <div className="grid grid-cols-1 gap-3">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, isHero: !formData.isHero })}
                     className={cn(
                       "flex items-center justify-between p-4 border-2 transition-all group",
-                      formData.isHero 
-                        ? "border-accent bg-accent/5 translate-x-1 shadow-[4px_4px_0px_0px_rgba(249,115,22,1)]" 
+                      formData.isHero
+                        ? "border-accent bg-accent/5 translate-x-1 shadow-[4px_4px_0px_0px_rgba(249,115,22,1)]"
                         : "border-slate-100 bg-slate-50 hover:border-slate-200"
                     )}
                   >
@@ -398,8 +399,8 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
                     onClick={() => setFormData({ ...formData, isFeatured: !formData.isFeatured })}
                     className={cn(
                       "flex items-center justify-between p-4 border-2 transition-all group",
-                      formData.isFeatured 
-                        ? "border-primary bg-primary/5 translate-x-1 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]" 
+                      formData.isFeatured
+                        ? "border-primary bg-primary/5 translate-x-1 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]"
                         : "border-slate-100 bg-slate-50 hover:border-slate-200"
                     )}
                   >

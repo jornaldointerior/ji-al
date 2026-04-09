@@ -21,7 +21,7 @@ export default function Hero() {
       const { data: headlineData } = await supabase
         .from("articles")
         .select(`id, title, excerpt, slug`)
-        .eq("home_section", "headline")
+        .or("home_section.eq.headline,is_hero.eq.true")
         .order("published_at", { ascending: false })
         .limit(1);
 
@@ -30,17 +30,6 @@ export default function Hero() {
       if (headlineData && headlineData.length > 0) {
         currentHeadline = headlineData[0];
         setHeadline(currentHeadline);
-      } else {
-        // Fallback for headline
-        const { data: fallbackHeadline } = await supabase
-          .from("articles")
-          .select(`id, title, excerpt, slug`)
-          .order("published_at", { ascending: false })
-          .limit(1);
-        if (fallbackHeadline && fallbackHeadline.length > 0) {
-          currentHeadline = fallbackHeadline[0];
-          setHeadline(currentHeadline);
-        }
       }
 
       // 2. Fetch Slideshow (Section 2)
@@ -63,7 +52,7 @@ export default function Hero() {
           .select(`id, title, excerpt, image_url, published_at, slug, categories(name)`)
           .order("published_at", { ascending: false })
           .limit(10); // Fetch more to ensure we have enough after filtering
-        
+
         if (fallbackSlides) {
           const filtered = fallbackSlides
             .filter(a => a.id !== currentHeadline?.id)
@@ -71,7 +60,7 @@ export default function Hero() {
           setSlides(filtered);
         }
       }
-      
+
       setLoading(false);
     }
 
@@ -99,14 +88,14 @@ export default function Hero() {
     <section className="relative pt-6 md:pt-10 pb-12 md:pb-16 overflow-hidden border-b border-primary/5">
       <Container>
         <div className="flex flex-col gap-16 md:gap-24">
-          
+
           {/* SECTION 1: MANCHETE PRINCIPAL (SÓ TEXTO) */}
           {headline && (
             <div className="relative w-full border-b-[3px] border-slate-950 pb-10 md:pb-16">
-               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent mb-8 block">Sessão 01 / Manchete de Capa</span>
-               <Link href={`/noticia/${headline.slug}`} className="group cursor-pointer w-full block">
-                <Headline 
-                  variant="massive" 
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent mb-8 block">Sessão 01 / Manchete de Capa</span>
+              <Link href={`/noticia/${headline.slug}`} className="group cursor-pointer w-full block">
+                <Headline
+                  variant="massive"
                   className="group-hover:opacity-75 transition-all duration-500 italic text-[clamp(1.4rem,4.2vw,3.5rem)]"
                 >
                   {headline.title}
@@ -118,8 +107,8 @@ export default function Hero() {
           {/* SECTION 2: ÚLTIMAS NOTÍCIAS (SLIDE + LISTA) */}
           <div className="flex flex-col gap-12">
             <div className="flex items-center gap-5 border-b-2 border-slate-100 pb-6">
-               <div className="w-3 h-3 bg-accent" />
-               <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-950">Sessão 02 / Panorama Regional</h3>
+              <div className="w-3 h-3 bg-accent" />
+              <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-950">Sessão 02 / Panorama Regional</h3>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
@@ -147,7 +136,7 @@ export default function Hero() {
                         {/* FOOTER CAPTION (SMALL TEXT) */}
                         <div className="bg-slate-950 p-8 md:p-10 flex flex-col gap-3">
                           <span className="text-[10px] text-white/60 font-black uppercase tracking-[0.3em] block">
-                             {slides[currentSlide].categories?.name}
+                            {slides[currentSlide].categories?.name}
                           </span>
                           <h4 className="text-2xl md:text-4xl font-black italic text-white tracking-tighter leading-[0.9] line-clamp-1">
                             {slides[currentSlide].title}
@@ -157,17 +146,17 @@ export default function Hero() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                
+
                 {/* Controls - Neo-Brutalist */}
                 <div className="absolute bottom-32 right-10 flex gap-4 z-20">
-                  <button 
-                    onClick={(e) => { e.preventDefault(); setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length); }} 
+                  <button
+                    onClick={(e) => { e.preventDefault(); setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length); }}
                     className="w-14 h-14 bg-white border-[3px] border-slate-950 flex items-center justify-center hover:bg-slate-950 hover:text-white transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                   >
                     <ChevronLeft size={24} strokeWidth={3} />
                   </button>
-                  <button 
-                    onClick={(e) => { e.preventDefault(); setCurrentSlide(prev => (prev + 1) % slides.length); }} 
+                  <button
+                    onClick={(e) => { e.preventDefault(); setCurrentSlide(prev => (prev + 1) % slides.length); }}
                     className="w-14 h-14 bg-white border-[3px] border-slate-950 flex items-center justify-center hover:bg-slate-950 hover:text-white transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                   >
                     <ChevronRight size={24} strokeWidth={3} />
@@ -179,8 +168,8 @@ export default function Hero() {
               <div className="lg:col-span-4 flex flex-col gap-10 py-2">
                 <div className="flex flex-col gap-4">
                   {slides.map((news, i) => (
-                    <Link 
-                      key={news.id} 
+                    <Link
+                      key={news.id}
                       href={`/noticia/${news.slug}`}
                       className={`flex items-start gap-8 group border-b border-slate-100 pb-8 last:border-0 last:pb-0 transition-all duration-500 ${currentSlide === i ? 'pl-6 border-l-[3px] border-l-slate-950 bg-slate-50 py-6 -ml-6' : ''}`}
                       onMouseEnter={() => setCurrentSlide(i)}

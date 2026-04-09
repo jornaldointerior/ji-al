@@ -21,9 +21,11 @@ export default function GlobalTracker() {
     async function trackVisit() {
       try {
         const { error } = await supabase.rpc('increment_site_views');
-        if (error) console.error("Falha ao registrar hit global:", error);
+        if (error && Object.keys(error).length > 0) {
+          console.warn("Analytics tracker indisponível momentaneamente.");
+        }
       } catch (err) {
-        console.error("Erro interno no tracker:", err);
+        // Silently fail if tracker is blocked or network drops
       }
     }
 
